@@ -6,14 +6,20 @@
 #define __KERNEL__
 #undef MODULE
 #define MODULE
-
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdlib.h>
 
 #include <linux/kernel.h>   /* We're doing kernel work */
 #include <linux/module.h>   /* Specifically, a module */
 #include <linux/fs.h>       /* for register_chrdev */
 #include <linux/uaccess.h>  /* for get_user  and put_user */
 #include <linux/string.h>   /* for memset. NOTE - not string.h!*/
-
+struct node {
+    char * data;
+    int key; // the key is the channel
+    struct node * next;
+};
 MODULE_LICENSE("GPL");
 
 //Our custom definitions of IOCTL operations
