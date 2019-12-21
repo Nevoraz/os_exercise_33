@@ -6,7 +6,7 @@
 #define __KERNEL__
 #undef MODULE
 #define MODULE
- 
+
 
 
 #include <linux/kernel.h>   /* We're doing kernel work */
@@ -26,7 +26,7 @@ struct node * delete(int key);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
 struct chardev_info{
-  spinlock_t lock;
+    spinlock_t lock;
 };
 // used to prevent concurent access into the same device
 static int dev_open_flag = 0;
@@ -38,71 +38,71 @@ static int current_channel = 0;
 //struct node * current = NULL;
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
-  unsigned long flags; // for spinlock
-  printk("Invoking device_open(%p)\n", file);
-  // We don't want to talk to two processes at the same time
-  spin_lock_irqsave(&device_info.lock, flags);
-  if( 1 == dev_open_flag ){
+    unsigned long flags; // for spinlock
+    printk("Invoking device_open(%p)\n", file);
+    // We don't want to talk to two processes at the same time
+    spin_lock_irqsave(&device_info.lock, flags);
+    if( 1 == dev_open_flag ){
+        spin_unlock_irqrestore(&device_info.lock, flags);
+        return -EBUSY;
+    }
+    ++dev_open_flag;
     spin_unlock_irqrestore(&device_info.lock, flags);
-    return -EBUSY;
-  }
-  ++dev_open_flag;
-  spin_unlock_irqrestore(&device_info.lock, flags);
-  return SUCCESS;
+    return SUCCESS;
 }
 //---------------------------------------------------------------
 static int device_release( struct inode* inode,struct file*  file){
-  unsigned long flags; // for spinlock
-  printk("Invoking device_release(%p,%p)\n", inode, file);
-  // ready for our next caller
-  spin_lock_irqsave(&device_info.lock, flags);
-  --dev_open_flag;
-  spin_unlock_irqrestore(&device_info.lock, flags);
-  return SUCCESS;
+    unsigned long flags; // for spinlock
+    printk("Invoking device_release(%p,%p)\n", inode, file);
+    // ready for our next caller
+    spin_lock_irqsave(&device_info.lock, flags);
+    --dev_open_flag;
+    spin_unlock_irqrestore(&device_info.lock, flags);
+    return SUCCESS;
 }
 //---------------------------------------------------------------
 // a process which has already opened
 // the device file attempts to read from it
 static ssize_t device_read( struct file* file, char __user* buffer, size_t length, loff_t* offset ){
-  printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, the_message );
-  return -EINVAL;
+    printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, the_message );
+    return -EINVAL;
 }
 //---------------------------------------------------------------
 // a processs which has already opened
 // the device file attempts to write to it
-static ssize_t device_write( struct file*       file,
-                             const char __user* buffer,
-                             size_t             length,
-                             loff_t*            offset)
-{
-  int i;
-  printk("Invoking device_write(%p,%d)\n", file, (int)length);
-  for( i = 0; i < length && i < BUF_LEN; ++i )
-  {
-    get_user(the_message[i], &buffer[i]);
-    if( 1 == encryption_flag )
-      the_message[i] += 1;
-  }
- 
-  // return the number of input characters used
-  return i;
+static ssize_t device_write( struct file* file, const char __user* buffer, size_t length, loff_t* offset){
+    int i;
+    if (current_channel == 0) {
+        errno = EINVAL;
+        return -1;
+    }
+    printk("Invoking device_write(%p,%d)\n", file, (int)length);
+    for( i = 0; i < length && i < BUF_LEN; ++i ){
+        get_user(the_message[i], &buffer[i]);
+        the_message[i] += 1;
+    }
+    insertFirst(current_channel, the_message);
+    // TODO create new message array and than copy
+    // return the number of input characters used
+    return i;
+    //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
+    //    TODO: In any other error case (for example, failing to allocate memory), returns -1 and errno is set appropriately (you are free to choose the exact value)
 }
-
 //----------------------------------------------------------------
 static long device_ioctl( struct   file* file,
-                          unsigned int   ioctl_command_id,
-                          unsigned long  ioctl_param )
+                         unsigned int   ioctl_command_id,
+                         unsigned long  ioctl_param )
 {
-  // Switch according to the ioctl called
-  if( IOCTL_SET_ENC == ioctl_command_id )
-  {
-    // Get the parameter given to ioctl by the process
-    printk( "Invoking ioctl: setting encryption "
-            "flag to %ld\n", ioctl_param );
-    encryption_flag = ioctl_param;
-  }
-
-  return SUCCESS;
+    // Switch according to the ioctl called
+    if( IOCTL_SET_ENC == ioctl_command_id )
+    {
+        // Get the parameter given to ioctl by the process
+        printk( "Invoking ioctl: setting encryption "
+               "flag to %ld\n", ioctl_param );
+        encryption_flag = ioctl_param;
+    }
+    
+    return SUCCESS;
 }
 
 //==================== DEVICE SETUP =============================
@@ -111,49 +111,49 @@ static long device_ioctl( struct   file* file,
 // when a process does something to the device we created
 struct file_operations Fops =
 {
-  .read           = device_read,
-  .write          = device_write,
-  .open           = device_open,
-  .unlocked_ioctl = device_ioctl,
-  .release        = device_release,
+    .read           = device_read,
+    .write          = device_write,
+    .open           = device_open,
+    .unlocked_ioctl = device_ioctl,
+    .release        = device_release,
 };
 
 //---------------------------------------------------------------
 // Initialize the module - Register the character device
 static int __init simple_init(void)
 {
-  int rc = -1;
-  // init dev struct
-  memset( &device_info, 0, sizeof(struct chardev_info) );
-  spin_lock_init( &device_info.lock );
-
-  // Register driver capabilities. Obtain major num
-  rc = register_chrdev( MAJOR_NUM, DEVICE_RANGE_NAME, &Fops );
-
-  // Negative values signify an error
-  if( rc < 0 )
-  {
-    printk( KERN_ALERT "%s registraion failed for  %d\n",
-                       DEVICE_FILE_NAME, MAJOR_NUM );
-    return rc;
-  }
-
-  printk( "Registeration is successful. ");
-  printk( "If you want to talk to the device driver,\n" );
-  printk( "you have to create a device file:\n" );
-  printk( "mknod /dev/%s c %d minor number\n", DEVICE_FILE_NAME, MAJOR_NUM );
-  printk( "Dont forget to rm the device file and "
-          "rmmod when you're done\n" );
-
-  return 0;
+    int rc = -1;
+    // init dev struct
+    memset( &device_info, 0, sizeof(struct chardev_info) );
+    spin_lock_init( &device_info.lock );
+    
+    // Register driver capabilities. Obtain major num
+    rc = register_chrdev( MAJOR_NUM, DEVICE_RANGE_NAME, &Fops );
+    
+    // Negative values signify an error
+    if( rc < 0 )
+    {
+        printk( KERN_ALERT "%s registraion failed for  %d\n",
+               DEVICE_FILE_NAME, MAJOR_NUM );
+        return rc;
+    }
+    
+    printk( "Registeration is successful. ");
+    printk( "If you want to talk to the device driver,\n" );
+    printk( "you have to create a device file:\n" );
+    printk( "mknod /dev/%s c %d minor number\n", DEVICE_FILE_NAME, MAJOR_NUM );
+    printk( "Dont forget to rm the device file and "
+           "rmmod when you're done\n" );
+    
+    return 0;
 }
 
 //---------------------------------------------------------------
 static void __exit simple_cleanup(void)
 {
-  // Unregister the device
-  // Should always succeed
-  unregister_chrdev(MAJOR_NUM, DEVICE_RANGE_NAME);
+    // Unregister the device
+    // Should always succeed
+    unregister_chrdev(MAJOR_NUM, DEVICE_RANGE_NAME);
 }
 
 //---------------------------------------------------------------
