@@ -25,23 +25,17 @@ struct node * find(int key);
 struct node * delete(int key);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
-
-struct chardev_info
-{
+struct chardev_info{
   spinlock_t lock;
 };
-
 // used to prevent concurent access into the same device
 static int dev_open_flag = 0;
-
 static struct chardev_info device_info;
-
 // The message the device will give when asked
-static char the_message[BUF_LEN];
-
-//Do we need to encrypt?
-static int encryption_flag = 0;
-
+static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
+static int current_channel = 0;
+struct node * head = NULL;
+struct node * current = NULL;
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode,
                         struct file*  file )
