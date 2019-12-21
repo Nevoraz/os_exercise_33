@@ -6,10 +6,10 @@
 #define __KERNEL__
 #undef MODULE
 #define MODULE
-//#include <stdio.h>
+#include <linux/stdio.h>
 #include <string.h>
-//#include <stdlib.h>
-//
+#include <linux/stdlib.h>
+
 #include <linux/kernel.h>   /* We're doing kernel work */
 #include <linux/module.h>   /* Specifically, a module */
 #include <linux/fs.h>       /* for register_chrdev */
