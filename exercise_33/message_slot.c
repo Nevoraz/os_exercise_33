@@ -89,18 +89,36 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
     //    TODO: In any other error case (for example, failing to allocate memory), returns -1 and errno is set appropriately (you are free to choose the exact value)
 }
 //----------------------------------------------------------------
-static long device_ioctl(struct file * file, unsigned int ioctl_command_id, unsigned int channel_to_set) { // Switch according to the ioctl called
-    if (IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id) { // Get the parameter given to ioctl by the process
-        if (channel_to_set == 0)
-            return -EINVAL;
-        printk("Invoking ioctl: setting channel " "to %d\n", channel_to_set);
-        current_channel = channel_to_set; // TODO: validate it sets the file descriptor’s channel id
-    }
-    else
-        return -EINVAL;
-    return SUCCESS;
-}
+//static long device_ioctl(struct file * file, unsigned int ioctl_command_id, unsigned int channel_to_set) { // Switch according to the ioctl called
+//    if (IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id) { // Get the parameter given to ioctl by the process
+//        if (channel_to_set == 0)
+//            return -EINVAL;
+//        printk("Invoking ioctl: setting channel " "to %d\n", channel_to_set);
+//        current_channel = channel_to_set; // TODO: validate it sets the file descriptor’s channel id
+//    }
+//    else
+//        return -EINVAL;
+//    return SUCCESS;
+//}
+//==============test ioctl start ==================
+static int encryption_flag = 0;
 
+static long device_ioctl( struct   file* file,
+                          unsigned int   ioctl_command_id,
+                          unsigned long  ioctl_param )
+{
+  // Switch according to the ioctl called
+  if( IOCTL_SET_ENC == ioctl_command_id )
+  {
+    // Get the parameter given to ioctl by the process
+    printk( "Invoking ioctl: setting encryption "
+            "flag to %ld\n", ioctl_param );
+    encryption_flag = ioctl_param;
+  }
+
+  return SUCCESS;
+}
+//==============test ioctl end ==================
 
 
 //==================== DEVICE SETUP =============================
