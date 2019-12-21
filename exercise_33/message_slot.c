@@ -73,8 +73,8 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
 static ssize_t device_write( struct file* file, const char __user* buffer, size_t length, loff_t* offset){
     int i;
     if (current_channel == 0) {
-        errno = EINVAL;
-        return -1;
+        
+        return -EINVAL;
     }
     printk("Invoking device_write(%p,%d)\n", file, (int)length);
     for( i = 0; i < length && i < BUF_LEN; ++i ){
@@ -89,21 +89,19 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
     //    TODO: In any other error case (for example, failing to allocate memory), returns -1 and errno is set appropriately (you are free to choose the exact value)
 }
 //----------------------------------------------------------------
-static long device_ioctl( struct   file* file,
-                         unsigned int   ioctl_command_id,
-                         unsigned long  ioctl_param )
-{
-    // Switch according to the ioctl called
-    if( IOCTL_SET_ENC == ioctl_command_id )
-    {
-        // Get the parameter given to ioctl by the process
-        printk( "Invoking ioctl: setting encryption "
-               "flag to %ld\n", ioctl_param );
-        encryption_flag = ioctl_param;
+static long device_ioctl(struct file * file, unsigned int ioctl_command_id, unsigned int channel_to_set) { // Switch according to the ioctl called
+    if (MSG_SLOT_CHANNEL == ioctl_command_id) { // Get the parameter given to ioctl by the process
+        if (channel_to_set == 0)
+            return -EINVAL;
+        printk("Invoking ioctl: setting channel " "to %ld\n", channel_to_set);
+        current_channel = ioctl_param; // TODO: validate it sets the file descriptor’s channel id
     }
-    
+    else
+        return -EINVAL;
     return SUCCESS;
 }
+
+
 
 //==================== DEVICE SETUP =============================
 
