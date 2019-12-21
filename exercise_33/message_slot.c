@@ -90,11 +90,11 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
 }
 //----------------------------------------------------------------
 static long device_ioctl(struct file * file, unsigned int ioctl_command_id, unsigned int channel_to_set) { // Switch according to the ioctl called
-    if (MSG_SLOT_CHANNEL == ioctl_command_id) { // Get the parameter given to ioctl by the process
+    if (IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id) { // Get the parameter given to ioctl by the process
         if (channel_to_set == 0)
             return -EINVAL;
-        printk("Invoking ioctl: setting channel " "to %ld\n", channel_to_set);
-        current_channel = ioctl_param; // TODO: validate it sets the file descriptor’s channel id
+        printk("Invoking ioctl: setting channel " "to %ld\n", (int)channel_to_set);//TODO: validate the int casting
+        current_channel = channel_to_set; // TODO: validate it sets the file descriptor’s channel id
     }
     else
         return -EINVAL;

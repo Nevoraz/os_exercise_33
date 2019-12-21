@@ -8,7 +8,7 @@
 #define MAJOR_NUM 240
 #define MINOR_NUM
 // Set the message of the device driver
-#define IOCTL_MSG_SLOT_CHANNEL(MAJOR_NUM, MINOR_NUM, int)
+#define IOCTL_MSG_SLOT_CHANNEL _IOW(MAJOR_NUM, MINOR_NUM, int)
 #define DEVICE_RANGE_NAME "char_dev" // TODO: check this line
 #define BUF_LEN 128
 #define DEVICE_FILE_NAME "slot" // TODO: check this line
