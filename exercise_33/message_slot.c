@@ -6,9 +6,9 @@
 #define __KERNEL__
 #undef MODULE
 #define MODULE
- #include <stdio.h>
- #include <string.h>
- #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <linux/kernel.h>   /* We're doing kernel work */
 #include <linux/module.h>   /* Specifically, a module */
