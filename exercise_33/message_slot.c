@@ -79,7 +79,7 @@ static ssize_t device_read( struct file* file,
 {
   printk( "Invocing device_read(%p,%d) - "
           "the message: %s)\n",
-          file, length, the_message );
+          file, (int)length, the_message );
   //invalid argument error
   return -EINVAL;
 }
@@ -93,7 +93,7 @@ static ssize_t device_write( struct file*       file,
                              loff_t*            offset)
 {
   int i;
-  printk("Invoking device_write(%p,%d)\n", file, length);
+  printk("Invoking device_write(%p,%d)\n", file, (int)length);
   for( i = 0; i < length && i < BUF_LEN; ++i )
   {
     get_user(the_message[i], &buffer[i]);
