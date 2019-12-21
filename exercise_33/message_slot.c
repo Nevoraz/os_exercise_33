@@ -37,54 +37,36 @@ static int current_channel = 0;
 //struct node * head = NULL;
 //struct node * current = NULL;
 //================== DEVICE FUNCTIONS ===========================
-static int device_open( struct inode* inode,
-                        struct file*  file )
-{
+static int device_open( struct inode* inode, struct file*  file ){
   unsigned long flags; // for spinlock
   printk("Invoking device_open(%p)\n", file);
-
   // We don't want to talk to two processes at the same time
   spin_lock_irqsave(&device_info.lock, flags);
-  if( 1 == dev_open_flag )
-  {
+  if( 1 == dev_open_flag ){
     spin_unlock_irqrestore(&device_info.lock, flags);
     return -EBUSY;
   }
-
   ++dev_open_flag;
   spin_unlock_irqrestore(&device_info.lock, flags);
   return SUCCESS;
 }
-
 //---------------------------------------------------------------
-static int device_release( struct inode* inode,
-                           struct file*  file)
-{
+static int device_release( struct inode* inode,struct file*  file){
   unsigned long flags; // for spinlock
   printk("Invoking device_release(%p,%p)\n", inode, file);
-
   // ready for our next caller
   spin_lock_irqsave(&device_info.lock, flags);
   --dev_open_flag;
   spin_unlock_irqrestore(&device_info.lock, flags);
   return SUCCESS;
 }
-
 //---------------------------------------------------------------
 // a process which has already opened
 // the device file attempts to read from it
-static ssize_t device_read( struct file* file,
-                            char __user* buffer,
-                            size_t       length,
-                            loff_t*      offset )
-{
-  printk( "Invocing device_read(%p,%d) - "
-          "the message: %s)\n",
-          file, (int)length, the_message );
-  //invalid argument error
+static ssize_t device_read( struct file* file, char __user* buffer, size_t length, loff_t* offset ){
+  printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, the_message );
   return -EINVAL;
 }
-
 //---------------------------------------------------------------
 // a processs which has already opened
 // the device file attempts to write to it
