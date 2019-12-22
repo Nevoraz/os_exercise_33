@@ -7,7 +7,7 @@
 #undef MODULE
 #define MODULE
 
-//#include <linux/slab.h>
+#include <linux/slab.h>
 #include <linux/kernel.h>   /* We're doing kernel work */
 #include <linux/module.h>   /* Specifically, a module */
 #include <linux/fs.h>       /* for register_chrdev */
