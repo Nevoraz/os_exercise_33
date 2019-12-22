@@ -73,7 +73,6 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
 static ssize_t device_write( struct file* file, const char __user* buffer, size_t length, loff_t* offset){
     int i;
     if (current_channel == 0) {
-        
         return -EINVAL;
     }
     printk("Invoking device_write(%p,%d)\n", file, (int)length);
@@ -82,6 +81,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         the_message[i] += 1;
     }
     insertFirst(current_channel, the_message);
+    printk("your message: '%s' in channel: %ld\n", the_message, current_channel);
     // TODO create new message array and than copy
     // return the number of input characters used
     return i;
@@ -145,6 +145,7 @@ module_exit(simple_cleanup);
 //========================= END OF FILE =========================
 
 // ================ linked list implementation ===============
+// credit to github
 // display the list
 static void printList(void) {
     struct node * ptr = head;
