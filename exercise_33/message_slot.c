@@ -7,7 +7,7 @@
 #undef MODULE
 #define MODULE
 
-#include <linux/slab.h>
+//#include <linux/slab.h>
 #include <linux/kernel.h>   /* We're doing kernel work */
 #include <linux/module.h>   /* Specifically, a module */
 #include <linux/fs.h>       /* for register_chrdev */
@@ -159,7 +159,7 @@ static void printList(void) {
 
 // insert link at the first location
 static void insertFirst(int key, char * data) { // create a link
-    struct node * link = (struct node *)kmalloc(sizeof(struct node));
+    struct node * link = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     link -> key = key;
     link -> data = data;
     // point it to old first node
