@@ -1,6 +1,5 @@
 current status:
 
-now the original ioctl version is in the file, I need to change it
 
 Tips for ex3
 

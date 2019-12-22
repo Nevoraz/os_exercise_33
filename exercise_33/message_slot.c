@@ -145,31 +145,34 @@ module_exit(simple_cleanup);
 //========================= END OF FILE =========================
 
 // ================ linked list implementation ===============
-//// display the list
-//static void printList(void) {
-//    struct node * ptr = head;
-//    printk("\n[ ");
-//    // start from the beginning
-//    while (ptr != NULL) {
-//        printk("(%d,%d) ", ptr -> key, ptr -> data);
-//        ptr = ptr -> next;
-//    }
-//    printk(" ]");
-//}
-//// insert link at the first location
-//static void insertFirst(int key, char * data) { // create a link
-//    struct node * link = (struct node *)kalloc(sizeof(struct node));
-//    link -> key = key;
-//    link -> data = data;
-//    // point it to old first node
-//    link -> next = head;
-//    // point first to new first node
-//    head = link;
-//}
-//// is list empty
-//static int isEmpty(void) {
-//    return head == NULL;
-//}
+// display the list
+static void printList(void) {
+    struct node * ptr = head;
+    printk("\n[ ");
+    // start from the beginning
+    while (ptr != NULL) {
+        printk("(%d,%d) ", ptr -> key, ptr -> data);
+        ptr = ptr -> next;
+    }
+    printk(" ]");
+}
+
+// insert link at the first location
+static void insertFirst(int key, char * data) { // create a link
+    struct node * link = (struct node *)kalloc(sizeof(struct node));
+    link -> key = key;
+    link -> data = data;
+    // point it to old first node
+    link -> next = head;
+    // point first to new first node
+    head = link;
+}
+
+// is list empty
+static int isEmpty(void) {
+    return head == NULL;
+}
+
 //// find a link with given key
 //static struct node * find(int key) { // start from the first link
 //    struct node * curr = head;
