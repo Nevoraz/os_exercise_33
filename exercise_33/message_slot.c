@@ -20,9 +20,9 @@ struct node {
     int key; // the key is the channel
     struct node * next;
 };
-//void insertFirst(int key, char data[]);// TODO: uncomment
-//struct node * find(int key);// TODO: uncomment
-//struct node * delete(int key);// TODO: uncomment
+void insertFirst(int key, char data[]);
+struct node * find(int key);
+struct node * delete(int key);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
 struct chardev_info{
@@ -144,74 +144,75 @@ static void __exit simple_cleanup(void){
 module_init(simple_init);
 module_exit(simple_cleanup);
 //========================= END OF FILE =========================
-//// ================ linked list implementation ===============
-//// display the list
-//void printList() {
-//    struct node * ptr = head;
-//    printk("\n[ ");
-//    // start from the beginning
-//    while (ptr != NULL) {
-//        printk("(%d,%d) ", ptr -> key, ptr -> data);
-//        ptr = ptr -> next;
-//    }
-//    printk(" ]");
-//}
-//// insert link at the first location
-//void insertFirst(int key, char * data) { // create a link
-//    struct node * link = (struct node *)kalloc(sizeof(struct node));
-//    link -> key = key;
-//    link -> data = data;
-//    // point it to old first node
-//    link -> next = head;
-//    // point first to new first node
-//    head = link;
-//}
-//// is list empty
-//int isEmpty() {
-//    return head == NULL;
-//}
-//// find a link with given key
-//struct node * find(int key) { // start from the first link
-//    struct node * current = head;
-//    // if list is empty
-//    if (head == NULL) {
-//        return NULL;
-//    }
-//    // navigate through list
-//    while (current -> key != key) { // if it is last node
-//        if (current -> next == NULL) {
-//            return NULL;
-//        } else { // go to next link
-//            current = current -> next;
-//        }
-//    }
-//    // if data found, return the current Link
-//    return current;
-//}
-//// delete a link with given key
-//struct node * delete(int key) { // start from the first link
-//    struct node * current = head;
-//    struct node * previous = NULL;
-//    // if list is empty
-//    if (head == NULL) {
-//        return NULL;
-//    }
-//    // navigate through list
-//    while (current -> key != key) { // if it is last node
-//        if (current -> next == NULL) {
-//            return NULL;
-//        } else { // store reference to current link
-//            previous = current;
-//            // move to next link
-//            current = current -> next;
-//        }
-//    }
-//    // found a match, update the link
-//    if (current == head) { // change first to point to next link
-//        head = head -> next;
-//    } else { // bypass the current link
-//        previous -> next = current -> next;
-//    }
-//    return current;
-//}
-//// ================ end of linked list implementation ===============
+
+// ================ linked list implementation ===============
+// display the list
+void printList() {
+    struct node * ptr = head;
+    printk("\n[ ");
+    // start from the beginning
+    while (ptr != NULL) {
+        printk("(%d,%d) ", ptr -> key, ptr -> data);
+        ptr = ptr -> next;
+    }
+    printk(" ]");
+}
+// insert link at the first location
+void insertFirst(int key, char * data) { // create a link
+    struct node * link = (struct node *)kalloc(sizeof(struct node));
+    link -> key = key;
+    link -> data = data;
+    // point it to old first node
+    link -> next = head;
+    // point first to new first node
+    head = link;
+}
+// is list empty
+int isEmpty() {
+    return head == NULL;
+}
+// find a link with given key
+struct node * find(int key) { // start from the first link
+    struct node * current = head;
+    // if list is empty
+    if (head == NULL) {
+        return NULL;
+    }
+    // navigate through list
+    while (current -> key != key) { // if it is last node
+        if (current -> next == NULL) {
+            return NULL;
+        } else { // go to next link
+            current = current -> next;
+        }
+    }
+    // if data found, return the current Link
+    return current;
+}
+// delete a link with given key
+struct node * delete(int key) { // start from the first link
+    struct node * current = head;
+    struct node * previous = NULL;
+    // if list is empty
+    if (head == NULL) {
+        return NULL;
+    }
+    // navigate through list
+    while (current -> key != key) { // if it is last node
+        if (current -> next == NULL) {
+            return NULL;
+        } else { // store reference to current link
+            previous = current;
+            // move to next link
+            current = current -> next;
+        }
+    }
+    // found a match, update the link
+    if (current == head) { // change first to point to next link
+        head = head -> next;
+    } else { // bypass the current link
+        previous -> next = current -> next;
+    }
+    return current;
+}
+// ================ end of linked list implementation ===============
