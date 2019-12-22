@@ -33,6 +33,7 @@ static int dev_open_flag = 0;
 static struct chardev_info device_info;
 // The message the device will give when asked
 static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
+static int minor_num = 0;
 static long current_channel = 0;// TODO: check if it should be int instead of long
 //struct node * head = NULL;
 //struct node * current = NULL;
@@ -129,7 +130,7 @@ static int __init simple_init(void){
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
     printk( "you have to create a device file:\n" );
-    printk( "mknod /dev/%s%d c %d minor number\n", DEVICE_FILE_NAME,MINOR_NUM, MAJOR_NUM );
+    printk( "mknod /dev/%s%d c %d minor number\n", DEVICE_FILE_NAME, minor_num, MAJOR_NUM );
     printk( "Dont forget to rm the device file and rmmod when you're done\n" );
     return 0;
 }
