@@ -113,7 +113,7 @@ static long device_ioctl( struct   file* file,
     // Get the parameter given to ioctl by the process
     printk( "Invoking ioctl: setting encryption "
             "flag to %d\n", channel_to_set );
-    encryption_flag = ioctl_param;
+    current_channel = channel_to_set;
   }
 
   return SUCCESS;
