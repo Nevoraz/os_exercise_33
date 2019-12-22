@@ -7,7 +7,7 @@
 #undef MODULE
 #define MODULE
 
-
+#include <linux/slab.h>
 #include <linux/kernel.h>   /* We're doing kernel work */
 #include <linux/module.h>   /* Specifically, a module */
 #include <linux/fs.h>       /* for register_chrdev */
@@ -173,48 +173,48 @@ static int isEmpty(void) {
     return head == NULL;
 }
 
-//// find a link with given key
-//static struct node * find(int key) { // start from the first link
-//    struct node * curr = head;
-//    // if list is empty
-//    if (head == NULL) {
-//        return NULL;
-//    }
-//    // navigate through list
-//    while (curr -> key != key) { // if it is last node
-//        if (curr -> next == NULL) {
-//            return NULL;
-//        } else { // go to next link
-//            curr = curr -> next;
-//        }
-//    }
-//    // if data found, return the curr Link
-//    return curr;
-//}
-//// delete a link with given key
-//static struct node * delete(int key) { // start from the first link
-//    struct node * curr = head;
-//    struct node * previous = NULL;
-//    // if list is empty
-//    if (head == NULL) {
-//        return NULL;
-//    }
-//    // navigate through list
-//    while (curr -> key != key) { // if it is last node
-//        if (curr -> next == NULL) {
-//            return NULL;
-//        } else { // store reference to curr link
-//            previous = curr;
-//            // move to next link
-//            curr = curr -> next;
-//        }
-//    }
-//    // found a match, update the link
-//    if (curr == head) { // change first to point to next link
-//        head = head -> next;
-//    } else { // bypass the curr link
-//        previous -> next = currt -> next;
-//    }
-//    return curr;
-//}
+// find a link with given key
+static struct node * find(int key) { // start from the first link
+    struct node * curr = head;
+    // if list is empty
+    if (head == NULL) {
+        return NULL;
+    }
+    // navigate through list
+    while (curr -> key != key) { // if it is last node
+        if (curr -> next == NULL) {
+            return NULL;
+        } else { // go to next link
+            curr = curr -> next;
+        }
+    }
+    // if data found, return the curr Link
+    return curr;
+}
+// delete a link with given key
+static struct node * delete(int key) { // start from the first link
+    struct node * curr = head;
+    struct node * previous = NULL;
+    // if list is empty
+    if (head == NULL) {
+        return NULL;
+    }
+    // navigate through list
+    while (curr -> key != key) { // if it is last node
+        if (curr -> next == NULL) {
+            return NULL;
+        } else { // store reference to curr link
+            previous = curr;
+            // move to next link
+            curr = curr -> next;
+        }
+    }
+    // found a match, update the link
+    if (curr == head) { // change first to point to next link
+        head = head -> next;
+    } else { // bypass the curr link
+        previous -> next = currt -> next;
+    }
+    return curr;
+}
 // ================ end of linked list implementation ===============
