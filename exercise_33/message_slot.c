@@ -108,7 +108,7 @@ static long device_ioctl( struct   file* file,
                           unsigned long  ioctl_param )
 {
   // Switch according to the ioctl called
-  if( IOCTL_SET_ENC == ioctl_command_id )
+  if( IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id )
   {
     // Get the parameter given to ioctl by the process
     printk( "Invoking ioctl: setting encryption "
