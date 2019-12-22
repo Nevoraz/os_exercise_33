@@ -151,7 +151,7 @@ static void printList(void) {
     printk("\n[ ");
     // start from the beginning
     while (ptr != NULL) {
-        printk("(%d,%d) ", ptr -> key, ptr -> data);
+        printk("(%d,%s) ", ptr -> key, ptr -> data);
         ptr = ptr -> next;
     }
     printk(" ]");
