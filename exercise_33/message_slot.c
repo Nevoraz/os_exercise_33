@@ -89,24 +89,10 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
     //    TODO: In any other error case (for example, failing to allocate memory), returns -1 and errno is set appropriately (you are free to choose the exact value)
 }
 //----------------------------------------------------------------
-//static long device_ioctl(struct file * file, unsigned int ioctl_command_id, unsigned int channel_to_set) { // Switch according to the ioctl called
-//    if (IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id) { // Get the parameter given to ioctl by the process
-//        if (channel_to_set == 0)
-//            return -EINVAL;
-//        printk("Invoking ioctl: setting channel " "to %d\n", channel_to_set);
-//        current_channel = channel_to_set; // TODO: validate it sets the file descriptor’s channel id
-//    }
-//    else
-//        return -EINVAL;
-//    return SUCCESS;
-//}
-//==============test ioctl start ==================
-
 static long device_ioctl( struct   file* file,
                          unsigned int   ioctl_command_id,
                          unsigned long  channel_to_set )
 {
-    // Switch according to the ioctl called
     if( IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id ){// Get the parameter given to ioctl by the process
         if (channel_to_set == 0)
             return -EINVAL;
@@ -117,64 +103,45 @@ static long device_ioctl( struct   file* file,
         return -EINVAL;
     return SUCCESS;
 }
-//==============test ioctl end ==================
-
-
 //==================== DEVICE SETUP =============================
-
 // This structure will hold the functions to be called
 // when a process does something to the device we created
-struct file_operations Fops =
-{
+struct file_operations Fops ={
     .read           = device_read,
     .write          = device_write,
     .open           = device_open,
-    .unlocked_ioctl = device_ioctl,
-    .release        = device_release,
+    .unlocked_ioctl = device_ioctl, .release        = device_release,
 };
-
 //---------------------------------------------------------------
 // Initialize the module - Register the character device
-static int __init simple_init(void)
-{
+static int __init simple_init(void){
     int rc = -1;
     // init dev struct
     memset( &device_info, 0, sizeof(struct chardev_info) );
     spin_lock_init( &device_info.lock );
-    
     // Register driver capabilities. Obtain major num
     rc = register_chrdev( MAJOR_NUM, DEVICE_RANGE_NAME, &Fops );
-    
     // Negative values signify an error
-    if( rc < 0 )
-    {
-        printk( KERN_ALERT "%s registraion failed for  %d\n",
-               DEVICE_FILE_NAME, MAJOR_NUM );
+    if( rc < 0 ){
+        printk( KERN_ALERT "%s registraion failed for  %d\n", DEVICE_FILE_NAME, MAJOR_NUM );
         return rc;
     }
-    
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
     printk( "you have to create a device file:\n" );
-    printk( "mknod /dev/%s c %d minor number\n", DEVICE_FILE_NAME, MAJOR_NUM );
-    printk( "Dont forget to rm the device file and "
-           "rmmod when you're done\n" );
-    
+    printk( "mknod /dev/%s%d c %d minor number\n", DEVICE_FILE_NAME,MINOR_NUM, MAJOR_NUM );
+    printk( "Dont forget to rm the device file and rmmod when you're done\n" );
     return 0;
 }
-
 //---------------------------------------------------------------
-static void __exit simple_cleanup(void)
-{
+static void __exit simple_cleanup(void){
     // Unregister the device
     // Should always succeed
     unregister_chrdev(MAJOR_NUM, DEVICE_RANGE_NAME);
 }
-
 //---------------------------------------------------------------
 module_init(simple_init);
 module_exit(simple_cleanup);
-
 //========================= END OF FILE =========================
 //// ================ linked list implementation ===============
 //// display the list
