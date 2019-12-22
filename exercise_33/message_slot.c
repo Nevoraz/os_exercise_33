@@ -35,8 +35,8 @@ static struct chardev_info device_info;
 static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
 static int minor_num = 0;
 static long current_channel = 0;// TODO: check if it should be int instead of long
-//struct node * head = NULL;
-//struct node * current = NULL;
+struct node * head = NULL;
+struct node * current = NULL;
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
     unsigned long flags; // for spinlock
@@ -147,7 +147,7 @@ module_exit(simple_cleanup);
 
 // ================ linked list implementation ===============
 // display the list
-void printList() {
+void printList(void) {
     struct node * ptr = head;
     printk("\n[ ");
     // start from the beginning
@@ -168,7 +168,7 @@ void insertFirst(int key, char * data) { // create a link
     head = link;
 }
 // is list empty
-int isEmpty() {
+int isEmpty(void) {
     return head == NULL;
 }
 // find a link with given key
