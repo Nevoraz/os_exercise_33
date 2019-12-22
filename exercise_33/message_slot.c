@@ -35,7 +35,7 @@ static char the_message[BUF_LEN]; // TODO: Note that the message can contain any
 static int minor_num = 0;
 static long current_channel = 0;// TODO: check if it should be int instead of long
 static struct node *head = NULL;
-static struct node *currentt = NULL;
+static struct node *curr = NULL;
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
     unsigned long flags; // for spinlock
@@ -172,46 +172,46 @@ module_exit(simple_cleanup);
 //}
 //// find a link with given key
 //static struct node * find(int key) { // start from the first link
-//    struct node * current = head;
+//    struct node * curr = head;
 //    // if list is empty
 //    if (head == NULL) {
 //        return NULL;
 //    }
 //    // navigate through list
-//    while (current -> key != key) { // if it is last node
-//        if (current -> next == NULL) {
+//    while (curr -> key != key) { // if it is last node
+//        if (curr -> next == NULL) {
 //            return NULL;
 //        } else { // go to next link
-//            current = current -> next;
+//            curr = curr -> next;
 //        }
 //    }
-//    // if data found, return the current Link
-//    return current;
+//    // if data found, return the curr Link
+//    return curr;
 //}
 //// delete a link with given key
 //static struct node * delete(int key) { // start from the first link
-//    struct node * current = head;
+//    struct node * curr = head;
 //    struct node * previous = NULL;
 //    // if list is empty
 //    if (head == NULL) {
 //        return NULL;
 //    }
 //    // navigate through list
-//    while (current -> key != key) { // if it is last node
-//        if (current -> next == NULL) {
+//    while (curr -> key != key) { // if it is last node
+//        if (curr -> next == NULL) {
 //            return NULL;
-//        } else { // store reference to current link
-//            previous = current;
+//        } else { // store reference to curr link
+//            previous = curr;
 //            // move to next link
-//            current = current -> next;
+//            curr = curr -> next;
 //        }
 //    }
 //    // found a match, update the link
-//    if (current == head) { // change first to point to next link
+//    if (curr == head) { // change first to point to next link
 //        head = head -> next;
-//    } else { // bypass the current link
-//        previous -> next = current -> next;
+//    } else { // bypass the curr link
+//        previous -> next = currt -> next;
 //    }
-//    return current;
+//    return curr;
 //}
 // ================ end of linked list implementation ===============
