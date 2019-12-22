@@ -159,7 +159,7 @@ static void printList(void) {
 
 // insert link at the first location
 static void insertFirst(int key, char * data) { // create a link
-    struct node * link = (struct node *)kalloc(sizeof(struct node));
+    struct node * link = (struct node *)kmalloc(sizeof(struct node));
     link -> key = key;
     link -> data = data;
     // point it to old first node
