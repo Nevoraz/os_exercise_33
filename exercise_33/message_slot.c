@@ -20,9 +20,9 @@ struct node {
     int key; // the key is the channel
     struct node * next;
 };
-void insertFirst(int key, char data[]);
-struct node * find(int key);
-struct node * delete(int key);
+//void insertFirst(int key, char data[]);// TODO: uncomment
+//struct node * find(int key);// TODO: uncomment
+//struct node * delete(int key);// TODO: uncomment
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
 struct chardev_info{
