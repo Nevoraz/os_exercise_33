@@ -33,7 +33,7 @@ static int dev_open_flag = 0;
 static struct chardev_info device_info;
 // The message the device will give when asked
 static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
-static int current_channel = 0;
+static long current_channel = 0;
 //struct node * head = NULL;
 //struct node * current = NULL;
 //================== DEVICE FUNCTIONS ===========================
@@ -101,18 +101,17 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
 //    return SUCCESS;
 //}
 //==============test ioctl start ==================
-static int encryption_flag = 0;
 
 static long device_ioctl( struct   file* file,
                           unsigned int   ioctl_command_id,
-                          unsigned int  channel_to_set )
+                          unsigned long  channel_to_set )
 {
   // Switch according to the ioctl called
   if( IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id )
   {
     // Get the parameter given to ioctl by the process
     printk( "Invoking ioctl: setting encryption "
-            "flag to %d\n", channel_to_set );
+            "flag to %ld\n", channel_to_set );
     current_channel = channel_to_set;
   }
 
