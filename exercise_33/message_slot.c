@@ -34,7 +34,7 @@ static struct chardev_info device_info;
 static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
 static int minor_num = 0;
 static long current_channel = 0;// TODO: check if it should be int instead of long
-//static struct node *head = NULL;
+static struct node *head = NULL;
 //static struct node *current = NULL;
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
