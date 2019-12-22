@@ -12,6 +12,6 @@
 
 #define DEVICE_RANGE_NAME "char_dev" // TODO: check this line
 #define BUF_LEN 128
-#define DEVICE_FILE_NAME "slot" // TODO: check this line
+#define DEVICE_FILE_NAME "slot1" // TODO: check this line
 #define SUCCESS 0 // TODO: check this line
 #endif /* message_slot_h */
