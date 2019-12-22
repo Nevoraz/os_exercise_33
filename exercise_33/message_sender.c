@@ -6,8 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main()
-{
+int main(int argc, char **argv[]){
   int file_desc;
   int ret_val;
 
