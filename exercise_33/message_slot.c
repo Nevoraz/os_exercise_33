@@ -213,7 +213,7 @@ static struct node * delete(int key) { // start from the first link
     if (curr == head) { // change first to point to next link
         head = head -> next;
     } else { // bypass the curr link
-        previous -> next = currt -> next;
+        previous -> next = curr -> next;
     }
     return curr;
 }
