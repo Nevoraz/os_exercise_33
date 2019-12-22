@@ -14,7 +14,7 @@
 #include <linux/uaccess.h>  /* for get_user  and put_user */
 #include <linux/string.h>   /* for memset. NOTE - not string.h!*/
 MODULE_LICENSE("GPL");
-static struct node {
+struct node {
     char * data;
     int key; // the key is the channel
     struct node * next;
