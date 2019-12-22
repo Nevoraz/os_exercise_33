@@ -110,9 +110,8 @@ static long device_ioctl( struct   file* file,
     if( IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id ){// Get the parameter given to ioctl by the process
         if (channel_to_set == 0)
             return -EINVAL;
-        printk( "Invoking ioctl: setting encryption "
-               "flag to %ld\n", channel_to_set );
-        current_channel = channel_to_set;
+        printk( "Invoking ioctl: setting channel to %ld\n", channel_to_set );
+        current_channel = channel_to_set;//TODO: validate it sets the file descriptor’s channel id
     }
     else
         return -EINVAL;
