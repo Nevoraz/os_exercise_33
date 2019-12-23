@@ -66,8 +66,8 @@ static int device_open( struct inode* inode, struct file*  file ){
     }
     ++dev_open_flag;
     spin_unlock_irqrestore(&device_info.lock, flags);
-    for (i = 0; i < 256; i++){
-        if(slots[i] == NULL){
+    for (i = 0; i < 256; i++){// finding empty slot
+        if(slots[i].channels == NULL){
             current_slot_index = i;
             printk("found an empty slot in index: %d\n", current_slot_index);
         }
@@ -116,7 +116,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
     }
     else{ // the channel exist so we override the message
-        current_node -> data = the_message;\\ TODO: fix it
+        current_node -> data = the_message;// TODO: fix it
     }
     printList(slots[current_slot_index].channels);
     printk("your message: '%s' in channel: %ld\n", the_message, current_channel);
@@ -173,7 +173,7 @@ static int __init simple_init(void){
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
     printk( "you have to create a device file:\n" );
-    printk( "mknod /dev/%s%d c %ld minor number\n", DEVICE_FILE_NAME, current_minor, MAJOR_NUM );
+    printk( "mknod /dev/%s%ld c %ld minor number\n", DEVICE_FILE_NAME, current_minor, MAJOR_NUM );
     printk( "Dont forget to rm the device file and rmmod when you're done\n" );
     return 0;
 }
