@@ -23,9 +23,11 @@ struct slot {
     long minor;
     struct node *channels;
 };
-static void insertFirst(long key, char * data);
-static struct node * find(long key);
-static struct node * delete(long key);
+
+static void printList(struct node *head);
+static struct node * insertFirst(int key, char * data, struct node *head);
+static struct node * find(int key, struct node *head);
+static struct node * delete(int key, struct node *head);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
 struct chardev_info{
@@ -41,19 +43,15 @@ static long current_channel = 0;
 static int current_slot_index = 0;
 struct node *head = NULL;
 struct node *curr = NULL;
-struct slot *slots[256];
-
-
-
-
-
-
+struct slot slots[256];
 
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
-// TODO: to set current_minor
-// TODO: find empty slot and set thecurrent_slot_index
+    // TODO: to set current_minor
+    // TODO: find empty slot and set thecurrent_slot_index
     unsigned long flags; // for spinlock
+    head = NULL;
+    curr = NULL;
     printk("Invoking device_open(%p) the minor is: %ld\n", file, current_minor);
     // We don't want to talk to two processes at the same time
     spin_lock_irqsave(&device_info.lock, flags);
@@ -63,6 +61,8 @@ static int device_open( struct inode* inode, struct file*  file ){
     }
     ++dev_open_flag;
     spin_unlock_irqrestore(&device_info.lock, flags);
+    slots[0].minor = current_minor;    // TODO: to set current_minor
+    // TODO: find empty slot and set thecurrent_slot_index
     return SUCCESS;
 }
 //---------------------------------------------------------------
@@ -79,6 +79,8 @@ static int device_release( struct inode* inode,struct file*  file){
 // a process which has already opened
 // the device file attempts to read from it
 static ssize_t device_read( struct file* file, char __user* buffer, size_t length, loff_t* offset ){
+    head = NULL;
+    curr = NULL;
     printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, the_message );
     return -EINVAL;
 }
@@ -87,6 +89,8 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
 // the device file attempts to write to it
 static ssize_t device_write( struct file* file, const char __user* buffer, size_t length, loff_t* offset){
     int i;
+    head = NULL;
+    curr = NULL;
     if (current_channel == 0) {
         return -EINVAL;
     }
@@ -95,12 +99,10 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         get_user(the_message[i], &buffer[i]);
         the_message[i] += 1;
     }
-    insertFirst(current_channel, the_message);
-    slots[current_slot_index] -> minor = current_minor;
-    slots[current_slot_index] -> channels = head;
+    slots[0].channels = insertFirst(current_channel, the_message, head);
     printk("your message: '%s' in channel: %ld\n", the_message, current_channel);
     // TODO create new message array and than copy
-
+    
     // return the number of input characters used
     return i;
     //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
@@ -111,6 +113,8 @@ static long device_ioctl( struct   file* file,
                          unsigned int   ioctl_command_id,
                          unsigned long  channel_to_set )
 {
+    head = NULL;
+    curr = NULL;
     if( IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id ){// Get the parameter given to ioctl by the process
         if (channel_to_set == 0)
             return -EINVAL;
@@ -144,10 +148,11 @@ static int __init simple_init(void){
         printk( KERN_ALERT "%s registraion failed for  %d\n", DEVICE_FILE_NAME, MAJOR_NUM );
         return rc;
     }
-//    ============== my data =================// TODO: to free
-
-
-//    ========  end of my data  ==============
+    //    ============== my data =================// TODO: to free the linked list
+    head = NULL;
+    curr = NULL;
+    
+    //    ========  end of my data  ==============
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
     printk( "you have to create a device file:\n" );
@@ -168,20 +173,19 @@ module_exit(simple_cleanup);
 
 // ================ linked list implementation ===============
 // credit to github
-// display the list
-static void printList(void) {
+static void printList(struct node *head) {
     struct node * ptr = head;
     printk("\n[ ");
     // start from the beginning
     while (ptr != NULL) {
-        printk("(%d,%s) ", ptr -> key, ptr -> data);
+        printk("(%ld,%s) ", ptr -> key, ptr -> data);
         ptr = ptr -> next;
     }
-    printk(" ]");
+    printf(" ]");
 }
 
 // insert link at the first location
-static void insertFirst(long key, char * data) { // create a link
+static struct node * insertFirst(int key, char * data, struct node *head) { // create a link
     struct node * link = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     link -> key = key;
     link -> data = data;
@@ -189,15 +193,16 @@ static void insertFirst(long key, char * data) { // create a link
     link -> next = head;
     // point first to new first node
     head = link;
+    return head;
 }
 
 // is list empty
-static int isEmpty(void) {
-    return head == NULL;
-}
+//static int isEmpty(void) {
+//    return head == NULL;
+//}
 
 // find a link with given key
-static struct node * find(long key) { // start from the first link
+static struct node * find(int key, struct node *head) { // start from the first link
     struct node * curr = head;
     // if list is empty
     if (head == NULL) {
@@ -215,7 +220,7 @@ static struct node * find(long key) { // start from the first link
     return curr;
 }
 // delete a link with given key
-static struct node * delete(long key) { // start from the first link
+static struct node * delete(int key, struct node *head) { // start from the first link
     struct node * curr = head;
     struct node * previous = NULL;
     // if list is empty
