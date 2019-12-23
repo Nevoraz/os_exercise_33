@@ -38,7 +38,7 @@ static int dev_open_flag = 0;
 static struct chardev_info device_info;
 // The message the device will give when asked
 static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
-static long current_minor = 0;
+static int current_minor = 0;
 static long current_channel = 0;
 static int current_slot_index = 0;
 struct node *head = NULL;
@@ -100,6 +100,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         the_message[i] += 1;
     }
     slots[0].channels = insertFirst(current_channel, the_message, head);
+    printList(slots[0].channels);
     printk("your message: '%s' in channel: %ld\n", the_message, current_channel);
     // TODO create new message array and than copy
     
@@ -181,7 +182,7 @@ static void printList(struct node *head) {
         printk("(%ld,%s) ", ptr -> key, ptr -> data);
         ptr = ptr -> next;
     }
-    printf(" ]");
+    printk(" ]");
 }
 
 // insert link at the first location
