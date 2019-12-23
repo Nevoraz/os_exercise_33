@@ -14,20 +14,22 @@
 #include <linux/uaccess.h>  /* for get_user  and put_user */
 #include <linux/string.h>   /* for memset. NOTE - not string.h!*/
 MODULE_LICENSE("GPL");
+
+
+// ========= linked list and other data ================
 struct node { // every node is a channel and the message
     char * data;
-    int key; // the key is the channel number
+    long key; // the key is the channel number
     struct node * next;
 };
 struct slot {
     long minor;
     struct node *channels;
 };
-
 static void printList(struct node *head);
-static struct node * insertFirst(int key, char * data, struct node *head);
-static struct node * find(int key, struct node *head);
-static struct node * delete(int key, struct node *head);
+static struct node * insertFirst(long key, char * data, struct node *head);
+static struct node * find(long key, struct node *head);
+static struct node * delete(long key, struct node *head);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
 struct chardev_info{
@@ -37,16 +39,19 @@ struct chardev_info{
 static int dev_open_flag = 0;
 static struct chardev_info device_info;
 // The message the device will give when asked
+
+//============= static variables ===============
 static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
 static int current_minor = 0;
 static long current_channel = 0;
 static int current_slot_index = 0;
-struct node *head = NULL;
-struct node *curr = NULL;
-struct slot slots[256];
+static struct node *head = NULL;
+static struct node *curr = NULL;
+static struct slot slots[256];
 
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
+    int i;
     // TODO: to set current_minor
     // TODO: find empty slot and set thecurrent_slot_index
     unsigned long flags; // for spinlock
@@ -61,8 +66,14 @@ static int device_open( struct inode* inode, struct file*  file ){
     }
     ++dev_open_flag;
     spin_unlock_irqrestore(&device_info.lock, flags);
-    slots[0].minor = current_minor;    // TODO: to set current_minor
-    // TODO: find empty slot and set thecurrent_slot_index
+    for (i = 0; i < 256; i++){
+        if(slots[i] == NULL){
+            current_slot_index = i;
+            printk("found an empty slot in index: %d\n", current_slot_index);
+        }
+    }
+    slots[current_slot_index].minor = current_minor;
+    slots[current_slot_index].channels = insertFirst(-1, the_message, head);// creating first node for every slot, to avoid confusing with head
     return SUCCESS;
 }
 //---------------------------------------------------------------
@@ -89,21 +100,26 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
 // the device file attempts to write to it
 static ssize_t device_write( struct file* file, const char __user* buffer, size_t length, loff_t* offset){
     int i;
+    struct node * current_node = NULL;
     head = NULL;
     curr = NULL;
     if (current_channel == 0) {
         return -EINVAL;
     }
     printk("Invoking device_write(%p,%d)\n", file, (int)length);
-    for( i = 0; i < length && i < BUF_LEN; ++i ){
+    for( i = 0; i < length && i < BUF_LEN; ++i ){    // TODO create new message array and than copy
         get_user(the_message[i], &buffer[i]);
         the_message[i] += 1;
     }
-    slots[0].channels = insertFirst(current_channel, the_message, head);
-    printList(slots[0].channels);
+    current_node = find(current_channel, slots[current_slot_index].channels);
+    if (current_node == NULL){// the channel is not exist
+        slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
+    }
+    else{ // the channel exist so we override the message
+        current_node -> data = the_message;\\ TODO: fix it
+    }
+    printList(slots[current_slot_index].channels);
     printk("your message: '%s' in channel: %ld\n", the_message, current_channel);
-    // TODO create new message array and than copy
-    
     // return the number of input characters used
     return i;
     //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
@@ -186,7 +202,7 @@ static void printList(struct node *head) {
 }
 
 // insert link at the first location
-static struct node * insertFirst(int key, char * data, struct node *head) { // create a link
+static struct node * insertFirst(long key, char * data, struct node *head) { // create a link
     struct node * link = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     link -> key = key;
     link -> data = data;
@@ -203,7 +219,7 @@ static struct node * insertFirst(int key, char * data, struct node *head) { // c
 //}
 
 // find a link with given key
-static struct node * find(int key, struct node *head) { // start from the first link
+static struct node * find(long key, struct node *head) { // start from the first link
     struct node * curr = head;
     // if list is empty
     if (head == NULL) {
@@ -221,7 +237,7 @@ static struct node * find(int key, struct node *head) { // start from the first 
     return curr;
 }
 // delete a link with given key
-static struct node * delete(int key, struct node *head) { // start from the first link
+static struct node * delete(long key, struct node *head) { // start from the first link
     struct node * curr = head;
     struct node * previous = NULL;
     // if list is empty
