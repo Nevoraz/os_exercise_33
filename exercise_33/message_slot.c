@@ -14,10 +14,14 @@
 #include <linux/uaccess.h>  /* for get_user  and put_user */
 #include <linux/string.h>   /* for memset. NOTE - not string.h!*/
 MODULE_LICENSE("GPL");
-struct node {
+struct node { // every node is a channel and the message
     char * data;
-    int key; // the key is the channel
+    int key; // the key is the channel number
     struct node * next;
+};
+struct slot {
+    long minor;
+    struct node *channels;
 };
 static void insertFirst(int key, char data[]);
 static struct node * find(int key);
@@ -32,14 +36,25 @@ static int dev_open_flag = 0;
 static struct chardev_info device_info;
 // The message the device will give when asked
 static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
-static int minor_num = 0;
-static long current_channel = 0;// TODO: check if it should be int instead of long
-static struct node *head = NULL;
-static struct node *curr = NULL;
+static long current_minor = 0;
+static long current_channel = 0;
+static int current_slot_index = 0;
+struct node *head = NULL;
+struct node *curr = NULL;
+struct slot **slots[256];
+
+//============ my data structure =================
+struct slot {
+    long minor = -1; //default value is -1
+    struct node *channels;
+};
+
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
+// TODO: to set current_minor
+// TODO: find empty slot and set thecurrent_slot_index
     unsigned long flags; // for spinlock
-    printk("Invoking device_open(%p)\n", file);
+    printk("Invoking device_open(%p) the minor is: %ld\n", file, current_minor);
     // We don't want to talk to two processes at the same time
     spin_lock_irqsave(&device_info.lock, flags);
     if( 1 == dev_open_flag ){
@@ -81,8 +96,11 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         the_message[i] += 1;
     }
     insertFirst(current_channel, the_message);
+    slots[current_slot_index] -> minor = current_minor;
+    slots[current_slot_index] -> channels = head;
     printk("your message: '%s' in channel: %ld\n", the_message, current_channel);
     // TODO create new message array and than copy
+
     // return the number of input characters used
     return i;
     //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
@@ -126,10 +144,14 @@ static int __init simple_init(void){
         printk( KERN_ALERT "%s registraion failed for  %d\n", DEVICE_FILE_NAME, MAJOR_NUM );
         return rc;
     }
+//    ============== my data =================// TODO: to free
+
+
+//    ========  end of my data  ==============
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
     printk( "you have to create a device file:\n" );
-    printk( "mknod /dev/%s%d c %d minor number\n", DEVICE_FILE_NAME, minor_num, MAJOR_NUM );
+    printk( "mknod /dev/%s%d c %d minor number\n", DEVICE_FILE_NAME, current_minor, MAJOR_NUM );
     printk( "Dont forget to rm the device file and rmmod when you're done\n" );
     return 0;
 }
@@ -159,7 +181,7 @@ static void printList(void) {
 }
 
 // insert link at the first location
-static void insertFirst(int key, char * data) { // create a link
+static void insertFirst(long key, char * data) { // create a link
     struct node * link = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     link -> key = key;
     link -> data = data;
@@ -175,7 +197,7 @@ static int isEmpty(void) {
 }
 
 // find a link with given key
-static struct node * find(int key) { // start from the first link
+static struct node * find(long key) { // start from the first link
     struct node * curr = head;
     // if list is empty
     if (head == NULL) {
@@ -193,7 +215,7 @@ static struct node * find(int key) { // start from the first link
     return curr;
 }
 // delete a link with given key
-static struct node * delete(int key) { // start from the first link
+static struct node * delete(long key) { // start from the first link
     struct node * curr = head;
     struct node * previous = NULL;
     // if list is empty
