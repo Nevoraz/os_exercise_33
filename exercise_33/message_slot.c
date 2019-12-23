@@ -23,9 +23,9 @@ struct slot {
     long minor;
     struct node *channels;
 };
-static void insertFirst(int key, char data[]);
-static struct node * find(int key);
-static struct node * delete(int key);
+static void insertFirst(long key, char * data);
+static struct node * find(long key);
+static struct node * delete(long key);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
 struct chardev_info{
@@ -41,13 +41,13 @@ static long current_channel = 0;
 static int current_slot_index = 0;
 struct node *head = NULL;
 struct node *curr = NULL;
-struct slot **slots[256];
+struct slot *slots[256];
 
-//============ my data structure =================
-struct slot {
-    long minor = -1; //default value is -1
-    struct node *channels;
-};
+
+
+
+
+
 
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
@@ -151,7 +151,7 @@ static int __init simple_init(void){
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
     printk( "you have to create a device file:\n" );
-    printk( "mknod /dev/%s%d c %d minor number\n", DEVICE_FILE_NAME, current_minor, MAJOR_NUM );
+    printk( "mknod /dev/%s%d c %ld minor number\n", DEVICE_FILE_NAME, current_minor, MAJOR_NUM );
     printk( "Dont forget to rm the device file and rmmod when you're done\n" );
     return 0;
 }
