@@ -30,6 +30,7 @@ static void printList(struct node *head);
 static struct node * insertFirst(long key, char * data, struct node *head);
 static struct node * find(long key, struct node *head);
 static struct node * delete(long key, struct node *head);
+void freeList(struct node * head_of_the_list);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
 struct chardev_info{
@@ -52,12 +53,11 @@ static struct slot slots[256];
 //================== DEVICE FUNCTIONS ===========================
 static int device_open( struct inode* inode, struct file*  file ){
     int i;
-    // TODO: to set current_minor
-    // TODO: find empty slot and set thecurrent_slot_index
     unsigned long flags; // for spinlock
     head = NULL;
     curr = NULL;
-    printk("Invoking device_open(%p) the minor is: %ld\n", file, current_minor);
+    current_minor = iminor(file_inode(file));    // TODO: to validate the current_minor
+    printk("Invoking device_open(%p) the minor is: %d\n", file, current_minor);
     // We don't want to talk to two processes at the same time
     spin_lock_irqsave(&device_info.lock, flags);
     if( 1 == dev_open_flag ){
@@ -66,14 +66,19 @@ static int device_open( struct inode* inode, struct file*  file ){
     }
     ++dev_open_flag;
     spin_unlock_irqrestore(&device_info.lock, flags);
-    for (i = 0; i < 256; i++){// finding empty slot
-        if(slots[i].channels == NULL){
+    for (i = 0; i < 256; i++){// finding empty slot or the minor slot
+        if(slots[i].minor == current_minor){
             current_slot_index = i;
             printk("found an empty slot in index: %d\n", current_slot_index);
+            break;
+        }
+        else if (slots[i].channels == NULL){// the minor slot is not exist so we create a new one
+            current_slot_index = i;
+            slots[current_slot_index].minor = current_minor;
+            slots[current_slot_index].channels = insertFirst(-1, the_message, head);// creating first node for every slot, to avoid confusing with head
+            break
         }
     }
-    slots[current_slot_index].minor = current_minor;
-    slots[current_slot_index].channels = insertFirst(-1, the_message, head);// creating first node for every slot, to avoid confusing with head
     return SUCCESS;
 }
 //---------------------------------------------------------------
@@ -90,8 +95,16 @@ static int device_release( struct inode* inode,struct file*  file){
 // a process which has already opened
 // the device file attempts to read from it
 static ssize_t device_read( struct file* file, char __user* buffer, size_t length, loff_t* offset ){
+    struct node * result_node;
     head = NULL;
     curr = NULL;
+    result_node = find(current_channel, slots[current_slot_index].channels);
+    if (result_node == NULL){
+//        TODO: return error becaude the channel is empty
+    }
+    else{
+//        TODO: return the message to the buffer
+    }
     printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, the_message );
     return -EINVAL;
 }
@@ -119,7 +132,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         current_node -> data = the_message;// TODO: fix it
     }
     printList(slots[current_slot_index].channels);
-    printk("your message: '%s' in channel: %ld\n", the_message, current_channel);
+    printk("\nyour message: '%s' in channel: %ld\n", the_message, current_channel);
     // return the number of input characters used
     return i;
     //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
@@ -165,10 +178,9 @@ static int __init simple_init(void){
         printk( KERN_ALERT "%s registraion failed for  %d\n", DEVICE_FILE_NAME, MAJOR_NUM );
         return rc;
     }
-    //    ============== my data =================// TODO: to free the linked list
+    //    ============== my data =================
     head = NULL;
     curr = NULL;
-    
     //    ========  end of my data  ==============
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
@@ -181,6 +193,10 @@ static int __init simple_init(void){
 static void __exit simple_cleanup(void){
     // Unregister the device
     // Should always succeed
+    for (i = 0; i < 256; i++){// finding empty slot or the minor slot
+        if(slots[i].channels != NULL)
+            freeList(slots[i].channels);
+    }
     unregister_chrdev(MAJOR_NUM, DEVICE_RANGE_NAME);
 }
 //---------------------------------------------------------------
@@ -262,4 +278,14 @@ static struct node * delete(long key, struct node *head) { // start from the fir
     }
     return curr;
 }
+
+void freeList(struct node * head_of_the_list){
+   struct node*  tmp;
+   while (head_of_the_list != NULL){
+       tmp = head_of_the_list;
+       head_of_the_list = head_of_the_list->next;
+       kfree(tmp);
+    }
+}
+
 // ================ end of linked list implementation ===============

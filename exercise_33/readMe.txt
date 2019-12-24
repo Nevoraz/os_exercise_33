@@ -1,5 +1,10 @@
 current status:
-
+i need to:
+- create the read()
+- validate the write()
+- all the todo's
+- reader.c
+- sender.c
 
 Tips for ex3
 
