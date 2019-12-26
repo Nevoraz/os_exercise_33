@@ -102,7 +102,7 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
     head = NULL;
     curr = NULL;
     result_node = find(current_channel, slots[current_slot_index].channels);
-    printk("inside read() slot number = %d , slot index = %d , channel = %ld" c,urrent_minor, current_slot_index, current_channel);
+    printk("inside read() slot number = %d , slot index = %d , channel = %ld" ,current_minor, current_slot_index, current_channel);
 
     if (result_node == NULL){// no message exists on the channel
         return -EWOULDBLOCK;
