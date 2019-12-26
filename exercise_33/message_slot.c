@@ -205,6 +205,7 @@ static void __exit simple_cleanup(void){
         if(slots[i].channels != NULL)
             freeList(slots[i].channels);
     }
+    prink("exitingggggggggggggg");
     unregister_chrdev(MAJOR_NUM, DEVICE_RANGE_NAME);
 }
 //---------------------------------------------------------------
