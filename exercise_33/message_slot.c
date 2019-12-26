@@ -56,7 +56,7 @@ static int device_open( struct inode* inode, struct file*  file ){
     unsigned long flags; // for spinlock
     head = NULL;
     curr = NULL;
-    the_message = "first node";
+    strcpy(the_message , "first node");
     current_minor = iminor(file_inode(file));    // TODO: to validate the current_minor
     printk("Invoking device_open(%p) the minor is: %d\n", file, current_minor);
     // We don't want to talk to two processes at the same time
