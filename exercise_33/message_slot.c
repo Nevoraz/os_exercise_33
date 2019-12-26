@@ -76,7 +76,7 @@ static int device_open( struct inode* inode, struct file*  file ){
             current_slot_index = i;
             slots[current_slot_index].minor = current_minor;
             slots[current_slot_index].channels = insertFirst(-1, the_message, head);// creating first node for every slot, to avoid confusing with head
-            break
+            break;
         }
     }
     return SUCCESS;
@@ -198,6 +198,7 @@ static int __init simple_init(void){
 static void __exit simple_cleanup(void){
     // Unregister the device
     // Should always succeed
+    int i;
     for (i = 0; i < 256; i++){// finding empty slot or the minor slot
         if(slots[i].channels != NULL)
             freeList(slots[i].channels);
@@ -258,31 +259,31 @@ static struct node * find(long key, struct node *head) { // start from the first
     return curr;
 }
 // delete a link with given key
-static struct node * delete(long key, struct node *head) { // start from the first link
-    struct node * curr = head;
-    struct node * previous = NULL;
-    // if list is empty
-    if (head == NULL) {
-        return NULL;
-    }
-    // navigate through list
-    while (curr -> key != key) { // if it is last node
-        if (curr -> next == NULL) {
-            return NULL;
-        } else { // store reference to curr link
-            previous = curr;
-            // move to next link
-            curr = curr -> next;
-        }
-    }
-    // found a match, update the link
-    if (curr == head) { // change first to point to next link
-        head = head -> next;
-    } else { // bypass the curr link
-        previous -> next = curr -> next;
-    }
-    return curr;
-}
+//static struct node * delete(long key, struct node *head) { // start from the first link
+//    struct node * curr = head;
+//    struct node * previous = NULL;
+//    // if list is empty
+//    if (head == NULL) {
+//        return NULL;
+//    }
+//    // navigate through list
+//    while (curr -> key != key) { // if it is last node
+//        if (curr -> next == NULL) {
+//            return NULL;
+//        } else { // store reference to curr link
+//            previous = curr;
+//            // move to next link
+//            curr = curr -> next;
+//        }
+//    }
+//    // found a match, update the link
+//    if (curr == head) { // change first to point to next link
+//        head = head -> next;
+//    } else { // bypass the curr link
+//        previous -> next = curr -> next;
+//    }
+//    return curr;
+//}
 
 void freeList(struct node * head_of_the_list){
    struct node*  tmp;
