@@ -135,11 +135,11 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
     }
     else{ // the channel exist so we override the message
-        current_node -> data = the_message;// TODO: fix it
+        strcpy(current_node -> data, the_message);// TODO: fix it
     }
     printList(slots[current_slot_index].channels);
     printk("\nyour message in channel: %ld\n", current_channel);
-    printk("\nyour message: '%s'\n", current_node -> data);
+//    printk("\nyour message: '%s'\n", current_node -> data);
     // return the number of input characters used
     return i;
     //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
@@ -192,7 +192,7 @@ static int __init simple_init(void){
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
     printk( "you have to create a device file:\n" );
-    printk( "mknod /dev/%s%d c %d minor number\n", DEVICE_FILE_NAME, current_minor, MAJOR_NUM );
+    printk( "mknod /dev/%s c %d minor number\n", DEVICE_FILE_NAME, MAJOR_NUM );
     printk( "Dont forget to rm the device file and rmmod when you're done\n" );
     return 0;
 }
