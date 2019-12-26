@@ -56,6 +56,7 @@ static int device_open( struct inode* inode, struct file*  file ){
     unsigned long flags; // for spinlock
     head = NULL;
     curr = NULL;
+    the_message = "first node";
     current_minor = iminor(file_inode(file));    // TODO: to validate the current_minor
     printk("Invoking device_open(%p) the minor is: %d\n", file, current_minor);
     // We don't want to talk to two processes at the same time
@@ -137,7 +138,8 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         current_node -> data = the_message;// TODO: fix it
     }
     printList(slots[current_slot_index].channels);
-    printk("\nyour message: '%s' in channel: %ld\n", current_node -> data, current_channel);
+    printk("\nyour message in channel: %ld\n", current_channel);
+    printk("\nyour message: '%s'\n", current_node -> data);
     // return the number of input characters used
     return i;
     //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
