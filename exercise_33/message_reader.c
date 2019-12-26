@@ -10,7 +10,7 @@ int main(int argc, char **arg){
     int file_desc;
     int ret_val;
     char messsage[100];
-    
+    printf("inside reader\n");
     file_desc = open( "/dev/"DEVICE_FILE_NAME, O_RDWR );
     if( file_desc < 0 )
     {
