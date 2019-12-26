@@ -68,20 +68,19 @@ static int device_open( struct inode* inode, struct file*  file ){
     ++dev_open_flag;
     spin_unlock_irqrestore(&device_info.lock, flags);
     for (i = 0; i < 256; i++){// finding empty slot or the minor slot
-        if (i == 0)
-            printk("looping to find empty slot\n");
         if(slots[i].minor == current_minor){
             current_slot_index = i;
-            printk("found an empty slot in index: %d\n", current_slot_index);
             break;
         }
         else if (slots[i].channels == NULL){// the minor slot is not exist so we create a new one
             current_slot_index = i;
             slots[current_slot_index].minor = current_minor;
             slots[current_slot_index].channels = insertFirst(-1, the_message, head);// creating first node for every slot, to avoid confusing with head
+            printk("found an empty slot in index: %d\n", current_slot_index);
             break;
         }
     }
+    printk("end of open() the slot number is %d and the slot index is %d" current_minor, current_slot_index);
     return SUCCESS;
 }
 //---------------------------------------------------------------
