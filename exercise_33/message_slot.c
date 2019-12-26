@@ -42,7 +42,7 @@ static struct chardev_info device_info;
 // The message the device will give when asked
 
 //============= static variables ===============
-static char the_message[BUF_LEN]; // TODO: Note that the message can contain any sequence of bytes, it is not necessarily a C string
+static char the_message[BUF_LEN];
 static int current_minor = 0;
 static long current_channel = 0;
 static int current_slot_index = 0;
@@ -67,6 +67,8 @@ static int device_open( struct inode* inode, struct file*  file ){
     ++dev_open_flag;
     spin_unlock_irqrestore(&device_info.lock, flags);
     for (i = 0; i < 256; i++){// finding empty slot or the minor slot
+        if (i == 0)
+            printk("looping to find empty slot\n");
         if(slots[i].minor == current_minor){
             current_slot_index = i;
             printk("found an empty slot in index: %d\n", current_slot_index);
@@ -105,9 +107,8 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
     }
     else{
 // TODO: read the message atomically
-        for( i = 0; i < length && i < BUF_LEN; ++i ){    // TODO create new message array and than copy
-            put_user(buffer[i], &the_message[i]);
-            the_message[i] += 1;
+        for( i = 0; i < length && i < BUF_LEN; ++i ){
+            put_user(buffer[i], &result_node.data[i]);
         }
     }
     printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, buffer );
@@ -127,8 +128,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
     printk("Invoking device_write(%p,%d)\n", file, (int)length);
     for( i = 0; i < length && i < BUF_LEN; ++i ){    // TODO create new message array and than copy
         get_user(the_message[i], &buffer[i]);
-        the_message[i] += 1;
-    }
+       }
     current_node = find(current_channel, slots[current_slot_index].channels);
     if (current_node == NULL){// the channel is not exist
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
@@ -137,7 +137,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         current_node -> data = the_message;// TODO: fix it
     }
     printList(slots[current_slot_index].channels);
-    printk("\nyour message: '%s' in channel: %ld\n", the_message, current_channel);
+    printk("\nyour message: '%s' in channel: %ld\n", current_node.data, current_channel);
     // return the number of input characters used
     return i;
     //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
