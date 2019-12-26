@@ -96,16 +96,21 @@ static int device_release( struct inode* inode,struct file*  file){
 // the device file attempts to read from it
 static ssize_t device_read( struct file* file, char __user* buffer, size_t length, loff_t* offset ){
     struct node * result_node;
+    int i;
     head = NULL;
     curr = NULL;
     result_node = find(current_channel, slots[current_slot_index].channels);
-    if (result_node == NULL){
-//        TODO: return error becaude the channel is empty
+    if (result_node == NULL){// no message exists on the channel
+        return -EWOULDBLOCK;
     }
     else{
-//        TODO: return the message to the buffer
+// TODO: read the message atomically
+        for( i = 0; i < length && i < BUF_LEN; ++i ){    // TODO create new message array and than copy
+            put_user(buffer[i], &the_message[i]);
+            the_message[i] += 1;
+        }
     }
-    printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, the_message );
+    printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, buffer );
     return -EINVAL;
 }
 //---------------------------------------------------------------
