@@ -29,7 +29,7 @@ struct slot {
 static void printList(struct node *head);
 static struct node * insertFirst(long key, char * data, struct node *head);
 static struct node * find(long key, struct node *head);
-static struct node * delete(long key, struct node *head);
+//static struct node * delete(long key, struct node *head);
 void freeList(struct node * head_of_the_list);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
@@ -190,7 +190,7 @@ static int __init simple_init(void){
     printk( "Registeration is successful. ");
     printk( "If you want to talk to the device driver,\n" );
     printk( "you have to create a device file:\n" );
-    printk( "mknod /dev/%s%ld c %ld minor number\n", DEVICE_FILE_NAME, current_minor, MAJOR_NUM );
+    printk( "mknod /dev/%s%d c %d minor number\n", DEVICE_FILE_NAME, current_minor, MAJOR_NUM );
     printk( "Dont forget to rm the device file and rmmod when you're done\n" );
     return 0;
 }
