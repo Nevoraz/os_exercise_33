@@ -108,7 +108,7 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
     else{
 // TODO: read the message atomically
         for( i = 0; i < length && i < BUF_LEN; ++i ){
-            put_user(buffer[i], &result_node.data[i]);
+            put_user(buffer[i], result_node.data[i]);
         }
     }
     printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, buffer );
