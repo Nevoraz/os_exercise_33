@@ -10,8 +10,8 @@
 
 int main(int argc, char **argv){
     int file_desc;
-    char messsage[128] = "";
-    int i;
+    char message[128] = "";
+    int i, message_length;
     printf("argc = %d\n",argc);
     for(i=0;i<argc;i++)
     {
@@ -24,12 +24,13 @@ int main(int argc, char **argv){
         exit(1);
     }
     ioctl( file_desc, IOCTL_MSG_SLOT_CHANNEL, atol(argv[2]));
-    if (read(file_desc, messsage, 1) < 0){
+    message_length = read(file_desc, message, 1);
+    if ( message_length < 0){
         printf("Error: %s\n", strerror(errno));
         exit(1);
     }
-    printf("read succesfully the message: %s\n", messsage);
-//    TODO: use write() system call
+    printf("read succesfully the message: %s\n", message);
+    write(STDOUT_FILENO, message, message_length);//    TODO: use write() system call
     close(file_desc);
     return 0;
 }

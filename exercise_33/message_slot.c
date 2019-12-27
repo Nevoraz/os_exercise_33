@@ -242,7 +242,7 @@ static void printList(struct node *head) {
 }
 
 // insert link at the first location
-static struct node * insertFirst(long key, char * data_input, int data_size, struct node *head){ // create a link
+static struct node * insertFirst(long key, char * data_input, int data_size = 0, struct node *head){ // create a link
     struct node * link = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     link -> key = key;
     link -> data = data_input;
