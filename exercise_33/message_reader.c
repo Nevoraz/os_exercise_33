@@ -11,6 +11,13 @@
 int main(int argc, char **argv){
     int file_desc;
     char messsage[128];
+    int i;
+    int i;
+    printf("%d\n",argc);
+    for(i=0;i<argc-1;i++)
+    {
+        printf("%s",argv[i]);
+    }
     printf("inside reader\n");
     file_desc = open( argv[1], O_RDWR );
     if( file_desc < 0 ){

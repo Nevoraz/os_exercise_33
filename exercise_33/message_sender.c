@@ -10,7 +10,13 @@
 
 int main(int argc, char **argv){
     int file_desc;
+    int i;
     printf("inside sender\n");
+    printf("%d\n",argc);
+    for(i=0;i<argc-1;i++)
+    {
+        printf("%s",argv[i]);
+    }
     file_desc = open( argv[1], O_RDWR );
     if( file_desc < 0 ){
         printf("Error: %s\n", strerror(errno));
