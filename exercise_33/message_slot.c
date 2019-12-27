@@ -29,7 +29,7 @@ struct slot {
 static void printList(struct node *head);
 static struct node * insertFirst(long key, char * data, struct node *head);
 static struct node * find(long key, struct node *head);
-//static struct node * delete(long key, struct node *head);
+static struct node * delete(long key, struct node *head);
 void freeList(struct node * head_of_the_list);
 //Our custom definitions of IOCTL operations
 #include "message_slot.h"
@@ -42,7 +42,7 @@ static struct chardev_info device_info;
 // The message the device will give when asked
 
 //============= static variables ===============
-static char the_message[BUF_LEN];
+//static char the_message[BUF_LEN];
 static int current_minor = 0;
 static long current_channel = 0;
 static int current_slot_index = 0;
@@ -56,7 +56,7 @@ static int device_open( struct inode* inode, struct file*  file ){
     unsigned long flags; // for spinlock
     head = NULL;
     curr = NULL;
-    strcpy(the_message , "first node");
+    char first_node_message[] = "first node";
     current_minor = iminor(file_inode(file));    // TODO: to validate the current_minor
     printk("Invoking device_open(%p) the minor is: %d\n", file, current_minor);
     // We don't want to talk to two processes at the same time
@@ -75,7 +75,7 @@ static int device_open( struct inode* inode, struct file*  file ){
         else if (slots[i].channels == NULL){// the minor slot is not exist so we create a new one
             current_slot_index = i;
             slots[current_slot_index].minor = current_minor;
-            slots[current_slot_index].channels = insertFirst(-1, the_message, head);// creating first node for every slot, to avoid confusing with head
+            slots[current_slot_index].channels = insertFirst(-1, first_node_message, head);// creating first node for every slot, to avoid confusing with head
             printk("found an empty slot in index: %d\n", current_slot_index);
             break;
         }
@@ -109,7 +109,7 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
         return -EWOULDBLOCK;
     }
     else{
-// TODO: read the message atomically
+        // TODO: read the message atomically
         for( i = 0; i < length && i < BUF_LEN; ++i ){
             put_user(result_node -> data[i], &buffer[i]);
         }
@@ -123,6 +123,7 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
 static ssize_t device_write( struct file* file, const char __user* buffer, size_t length, loff_t* offset){
     int i;
     struct node * current_node = NULL;
+    char *the_message = kmalloc(sizeof(char*) * length, GFP_KERNEL);
     head = NULL;
     curr = NULL;
     if (current_channel == 0) {
@@ -131,13 +132,14 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
     printk("Invoking device_write(%p,%d)\n", file, (int)length);
     for( i = 0; i < length && i < BUF_LEN; ++i ){    // TODO create new message array and than copy
         get_user(the_message[i], &buffer[i]);
-       }
+    }
     current_node = find(current_channel, slots[current_slot_index].channels);
     if (current_node == NULL){// the channel is not exist
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
     }
-    else{ // the channel exist so we override the message
-        strcpy(current_node -> data, the_message);// TODO: fix it
+    else{ // the channel exist so we delete the node and insert a new one
+        delete(current_channel, slots[current_slot_index].channels);
+        slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
     }
     printList(slots[current_slot_index].channels);
     printk("your message in channel: %ld\n", current_channel);
@@ -232,7 +234,7 @@ static void printList(struct node *head) {
 static struct node * insertFirst(long key, char * data, struct node *head) { // create a link
     struct node * link = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     link -> key = key;
-    link -> data = data;
+    strcpy(link -> data, the_message)
     // point it to old first node
     link -> next = head;
     // point first to new first node
@@ -263,39 +265,42 @@ static struct node * find(long key, struct node *head) { // start from the first
     // if data found, return the curr Link
     return curr;
 }
+
 // delete a link with given key
-//static struct node * delete(long key, struct node *head) { // start from the first link
-//    struct node * curr = head;
-//    struct node * previous = NULL;
-//    // if list is empty
-//    if (head == NULL) {
-//        return NULL;
-//    }
-//    // navigate through list
-//    while (curr -> key != key) { // if it is last node
-//        if (curr -> next == NULL) {
-//            return NULL;
-//        } else { // store reference to curr link
-//            previous = curr;
-//            // move to next link
-//            curr = curr -> next;
-//        }
-//    }
-//    // found a match, update the link
-//    if (curr == head) { // change first to point to next link
-//        head = head -> next;
-//    } else { // bypass the curr link
-//        previous -> next = curr -> next;
-//    }
-//    return curr;
-//}
+static struct node * delete(long key, struct node *head) { // start from the first link
+    struct node * curr = head;
+    struct node * previous = NULL;
+    // if list is empty
+    if (head == NULL) {
+        return NULL;
+    }
+    // navigate through list
+    while (curr -> key != key) { // if it is last node
+        if (curr -> next == NULL) {
+            return NULL;
+        } else { // store reference to curr link
+            previous = curr;
+            // move to next link
+            curr = curr -> next;
+        }
+    }
+    // found a match, update the link
+    if (curr == head) { // change first to point to next link
+        head = head -> next;
+    } else { // bypass the curr link
+        previous -> next = curr -> next;
+    }
+    return curr;
+    //    TODO: free the node data
+}
 
 void freeList(struct node * head_of_the_list){
-   struct node*  tmp;
-   while (head_of_the_list != NULL){
-       tmp = head_of_the_list;
-       head_of_the_list = head_of_the_list->next;
-       kfree(tmp);
+    struct node*  tmp;
+    while (head_of_the_list != NULL){
+        tmp = head_of_the_list;
+        head_of_the_list = head_of_the_list->next;
+        kfree(tmp -> data);
+        kfree(tmp);
     }
 }
 
