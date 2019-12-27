@@ -11,12 +11,7 @@
 int main(int argc, char **argv){
     int file_desc;
     int i;
-    printf("inside sender\n");
-    printf("argc = %d\n",argc);
-    for(i=0;i<argc;i++)
-    {
-        printf("%d = %s\n",i, argv[i]);
-    }
+//    printf("inside sender\n");
     file_desc = open( argv[1], O_RDWR );
     if( file_desc < 0 ){
         printf("Error: %s\n", strerror(errno));
@@ -28,7 +23,7 @@ int main(int argc, char **argv){
         exit(1);
     }
     close(file_desc);
-    printf("sender ended successfully\n");
+//    printf("sender ended successfully\n");
     return 0;
 }
 
