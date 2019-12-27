@@ -15,7 +15,7 @@ int main(int argc, char **argv){
     printf("argc = %d\n",argc);
     for(i=0;i<argc-1;i++)
     {
-        printf("%d = %s",i, argv[i]);
+        printf("%d = %s\n",i, argv[i]);
     }
     printf("inside reader\n");
     file_desc = open( argv[1], O_RDWR );
