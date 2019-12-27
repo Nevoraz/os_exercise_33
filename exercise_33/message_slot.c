@@ -110,7 +110,7 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
     }
     else{
         // TODO: read the message atomically
-        for( i = 0; i < length && i < BUF_LEN; ++i ){
+        for( i = 0; i < strlen(result_node -> data) && i < BUF_LEN; ++i ){
             put_user(result_node -> data[i], &buffer[i]);
         }
     }
