@@ -1,7 +1,5 @@
 current status:
-i need to:
-- create the read()
-- validate the write()
+I need to:
 - all the todo's
 - reader.c
 - sender.c

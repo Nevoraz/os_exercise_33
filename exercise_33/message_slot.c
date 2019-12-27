@@ -44,7 +44,7 @@ static struct chardev_info device_info;
 //============= static variables ===============
 //static char the_message[BUF_LEN];
 static int current_minor = 0;
-static long current_channel = 0;
+static long current_channel = -1;
 static int current_slot_index = 0;
 static struct node *head = NULL;
 static struct node *curr = NULL;
@@ -57,7 +57,7 @@ static int device_open( struct inode* inode, struct file*  file ){
     char first_node_message[] = "first node";
     head = NULL;
     curr = NULL;
-    current_minor = iminor(file_inode(file));    // TODO: to validate the current_minor
+    current_minor = iminor(file_inode(file));
     printk("Invoking device_open(%p) the minor is: %d\n", file, current_minor);
     // We don't want to talk to two processes at the same time
     spin_lock_irqsave(&device_info.lock, flags);
@@ -115,7 +115,10 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
         }
     }
     printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, buffer );
-    return -EINVAL;
+    return i;
+//    return -EINVAL;
+//    TODO: If no channel has been set on the file descriptor, returns -1 and errno is set to EINVAL.
+ //    TODO:   If the provided buffer length is too small to hold the message, returns -1 and errno is set to ENOSPC
 }
 //---------------------------------------------------------------
 // a processs which has already opened
@@ -123,14 +126,19 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
 static ssize_t device_write( struct file* file, const char __user* buffer, size_t length, loff_t* offset){
     int i;
     struct node * current_node = NULL;
+    struct node * deleted_node = NULL;
     char *the_message = kmalloc(sizeof(char*) * length+1, GFP_KERNEL);
     head = NULL;
     curr = NULL;
-    if (current_channel == 0) {
+    if (current_channel == -1) {
         return -EINVAL;
     }
+    if (length == 0 || length > 128){
+        printk("message length is invalid, it is %d", length);
+        return -EMSGSIZE;
+    }
     printk("Invoking device_write(%p,%d)\n", file, (int)length);
-    for( i = 0; i < length && i < BUF_LEN; ++i ){    // TODO create new message array and than copy
+    for( i = 0; i < length && i < BUF_LEN; ++i ){            // TODO: write the message atomically
         get_user(the_message[i], &buffer[i]);
     }
     current_node = find(current_channel, slots[current_slot_index].channels);
@@ -138,14 +146,17 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
     }
     else{ // the channel exist so we delete the node and insert a new one
-        delete(current_channel, slots[current_slot_index].channels);
+        deleted_node =delete(current_channel, slots[current_slot_index].channels);
+        freek(deleted_node ->data);
+        freek(deleted_node);
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
     }
     printList(slots[current_slot_index].channels);
 //    printk("your message in channel: %ld\n", current_channel);
     // return the number of input characters used
     return i;
-    //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
+    //    TODO: If no channel has been set on the file descriptor, returns -1 and errno is set to EINVAL.
+
     //    TODO: In any other error case (for example, failing to allocate memory), returns -1 and errno is set appropriately (you are free to choose the exact value)
 }
 //----------------------------------------------------------------
@@ -159,7 +170,7 @@ static long device_ioctl( struct   file* file,
         if (channel_to_set == 0)
             return -EINVAL;
         printk( "Invoking ioctl: setting channel to %ld\n", channel_to_set );
-        current_channel = channel_to_set;//TODO: validate it sets the file descriptor’s channel id
+        current_channel = channel_to_set;
     }
     else
         return -EINVAL;
@@ -290,7 +301,6 @@ static struct node * delete(long key, struct node *head) { // start from the fir
         previous -> next = curr -> next;
     }
     return curr;
-    //    TODO: free the node data
 }
 
 void freeList(struct node * head_of_the_list){
