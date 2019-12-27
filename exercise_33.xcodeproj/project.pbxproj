@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DEAB25EB23B660C90038CB56 /* tester2.c in Sources */ = {isa = PBXBuildFile; fileRef = DEAB25EA23B660C90038CB56 /* tester2.c */; };
 		DECC8CDA23AE091400A47FF2 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = DECC8CD323AE091300A47FF2 /* Makefile */; };
 		DECC8CDB23AE091400A47FF2 /* message_sender.c in Sources */ = {isa = PBXBuildFile; fileRef = DECC8CD523AE091400A47FF2 /* message_sender.c */; };
 		DECC8CDC23AE091400A47FF2 /* message_reader.c in Sources */ = {isa = PBXBuildFile; fileRef = DECC8CD823AE091400A47FF2 /* message_reader.c */; };
@@ -26,6 +27,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DEAB25EA23B660C90038CB56 /* tester2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tester2.c; sourceTree = "<group>"; };
 		DECC8CC923AE08D300A47FF2 /* exercise_33 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = exercise_33; sourceTree = BUILT_PRODUCTS_DIR; };
 		DECC8CD323AE091300A47FF2 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		DECC8CD423AE091400A47FF2 /* message_slot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = message_slot.h; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 		DECC8CCB23AE08D300A47FF2 /* exercise_33 */ = {
 			isa = PBXGroup;
 			children = (
+				DEAB25EA23B660C90038CB56 /* tester2.c */,
 				DECC8CD423AE091400A47FF2 /* message_slot.h */,
 				DECC8CD923AE091400A47FF2 /* message_slot.c */,
 				DECC8CD823AE091400A47FF2 /* message_reader.c */,
@@ -135,6 +138,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DECC8CDC23AE091400A47FF2 /* message_reader.c in Sources */,
+				DEAB25EB23B660C90038CB56 /* tester2.c in Sources */,
 				DECC8CDD23AE091400A47FF2 /* message_slot.c in Sources */,
 				DECC8CDB23AE091400A47FF2 /* message_sender.c in Sources */,
 				DECC8CDA23AE091400A47FF2 /* Makefile in Sources */,
