@@ -183,7 +183,9 @@ struct file_operations Fops ={
     .read           = device_read,
     .write          = device_write,
     .open           = device_open,
-    .unlocked_ioctl = device_ioctl, .release        = device_release,
+    .unlocked_ioctl = device_ioctl,
+    .release        = device_release,
+    .owner = THIS_MODULE,
 };
 //---------------------------------------------------------------
 // Initialize the module - Register the character device
