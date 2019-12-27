@@ -21,13 +21,14 @@ struct node { // every node is a channel and the message
     char * data;
     long key; // the key is the channel number
     struct node * next;
+    int data_size;
 };
 struct slot {
     long minor;
     struct node *channels;
 };
 static void printList(struct node *head);
-static struct node * insertFirst(long key, char * data, struct node *head);
+static struct node * insertFirst(long key, char * data, int data_size, struct node *head);
 static struct node * find(long key, struct node *head);
 static struct node * delete(long key, struct node *head);
 void freeList(struct node * head_of_the_list);
@@ -57,6 +58,7 @@ static int device_open( struct inode* inode, struct file*  file ){
     char first_node_message[] = "first node";
     head = NULL;
     curr = NULL;
+    current_channel = -1;
     current_minor = iminor(file_inode(file));
     printk("Invoking device_open(%p) the minor is: %d\n", file, current_minor);
     // We don't want to talk to two processes at the same time
@@ -75,7 +77,7 @@ static int device_open( struct inode* inode, struct file*  file ){
         else if (slots[i].channels == NULL){// the minor slot is not exist so we create a new one
             current_slot_index = i;
             slots[current_slot_index].minor = current_minor;
-            slots[current_slot_index].channels = insertFirst(-1, first_node_message, head);// creating first node for every slot, to avoid confusing with head
+            slots[current_slot_index].channels = insertFirst(-1, first_node_message,-1, head);// creating first node for every slot, to avoid confusing with head
             printk("found an empty slot in index: %d\n", current_slot_index);
             break;
         }
@@ -103,22 +105,19 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
     curr = NULL;
     result_node = find(current_channel, slots[current_slot_index].channels);
     printk("inside read() slot number = %d , slot index = %d , channel = %ld" ,current_minor, current_slot_index, current_channel);
-//    printk("result_node channel is %ld", result_node->key);
-//    printk("result_node data is %s\n", result_node->data);
     if (result_node == NULL){// no message exists on the channel
         return -EWOULDBLOCK;
     }
     else{
         // TODO: read the message atomically
-        for( i = 0; i < strlen(result_node -> data) && i < BUF_LEN; ++i ){
+        for( i = 0; i < (result_node -> data_size) && i < BUF_LEN; ++i ){
             put_user(result_node -> data[i], &buffer[i]);
         }
     }
-    printk( "Invocing device_read(%p,%d) - " "the message: %s)\n", file, (int)length, buffer );
+    printk( "Invocing device_read(%p) - " "the message: %s)\n", file, buffer );
     return i;
-//    return -EINVAL;
 //    TODO: If no channel has been set on the file descriptor, returns -1 and errno is set to EINVAL.
- //    TODO:   If the provided buffer length is too small to hold the message, returns -1 and errno is set to ENOSPC
+//    TODO:   If the provided buffer length is too small to hold the message, returns -1 and errno is set to ENOSPC
 }
 //---------------------------------------------------------------
 // a processs which has already opened
@@ -143,13 +142,13 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
     }
     current_node = find(current_channel, slots[current_slot_index].channels);
     if (current_node == NULL){// the channel is not exist
-        slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
+        slots[current_slot_index].channels = insertFirst(current_channel, the_message, i, slots[current_slot_index].channels);
     }
     else{ // the channel exist so we delete the node and insert a new one
         deleted_node =delete(current_channel, slots[current_slot_index].channels);
         kfree(deleted_node ->data);
         kfree(deleted_node);
-        slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
+        slots[current_slot_index].channels = insertFirst(current_channel, the_message, i, slots[current_slot_index].channels);
     }
     printList(slots[current_slot_index].channels);
 //    printk("your message in channel: %ld\n", current_channel);
@@ -243,10 +242,11 @@ static void printList(struct node *head) {
 }
 
 // insert link at the first location
-static struct node * insertFirst(long key, char * data_input, struct node *head) { // create a link
+static struct node * insertFirst(long key, char * data, int data_size, struct node *head){ // create a link
     struct node * link = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     link -> key = key;
     link -> data = data_input;
+    link -> data_size = data_size;
     // point it to old first node
     link -> next = head;
     // point first to new first node
