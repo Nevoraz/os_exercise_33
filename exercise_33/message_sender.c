@@ -13,7 +13,7 @@ int main(int argc, char **argv){
     int i;
     printf("inside sender\n");
     printf("argc = %d\n",argc);
-    for(i=0;i<argc-1;i++)
+    for(i=0;i<argc;i++)
     {
         printf("%d = %s\n",i, argv[i]);
     }
