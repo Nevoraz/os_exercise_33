@@ -15,10 +15,13 @@ int main(int argc, char **argv){
     file_desc = open( argv[1], O_RDWR );
     if( file_desc < 0 ){
         printf("Error: %s\n", strerror(errno));
-        exit(-1);
+        exit(1);
     }
     ioctl( file_desc, IOCTL_MSG_SLOT_CHANNEL, argv[2]);
-    (void)read(file_desc, messsage, 5);
+    if (read(file_desc, messsage, 5) < 0){
+        printf("Error: %s\n", strerror(errno));
+        exit(1);
+    }
     printf("read succesfully the message: %s\n", messsage);
 //    TODO: use write() system call
     close(file_desc);

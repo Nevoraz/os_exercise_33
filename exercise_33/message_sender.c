@@ -14,12 +14,12 @@ int main(int argc, char **argv){
     file_desc = open( argv[1], O_RDWR );
     if( file_desc < 0 ){
         printf("Error: %s\n", strerror(errno));
-        exit(-1);
+        exit(1);
     }
     ioctl( file_desc, IOCTL_MSG_SLOT_CHANNEL, argv[2]);
     if(write( file_desc, argv[3], strlen(argv[3])) != strlen(argv[3])){
         printf("Error: %s\n", strerror(errno));
-        exit(-1);
+        exit(1);
     }
     close(file_desc);
     printf("sender ended successfully\n");
