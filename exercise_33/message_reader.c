@@ -23,7 +23,7 @@ int main(int argc, char **argv){
         printf("Error: %s\n", strerror(errno));
         exit(1);
     }
-    ioctl( file_desc, IOCTL_MSG_SLOT_CHANNEL, (long)argv[2]);
+    ioctl( file_desc, IOCTL_MSG_SLOT_CHANNEL, atoi(argv[2]));
     if (read(file_desc, messsage, 5) < 0){
         printf("Error: %s\n", strerror(errno));
         exit(1);
