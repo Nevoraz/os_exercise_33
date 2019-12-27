@@ -123,7 +123,7 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
 static ssize_t device_write( struct file* file, const char __user* buffer, size_t length, loff_t* offset){
     int i;
     struct node * current_node = NULL;
-    char *the_message = kmalloc(sizeof(char*) * length, GFP_KERNEL);
+    char *the_message = kmalloc(sizeof(char*) * length+1, GFP_KERNEL);
     head = NULL;
     curr = NULL;
     if (current_channel == 0) {
@@ -142,8 +142,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
     }
     printList(slots[current_slot_index].channels);
-    printk("your message in channel: %ld\n", current_channel);
-    printk("your message %s\n", current_node->data);
+//    printk("your message in channel: %ld\n", current_channel);
     // return the number of input characters used
     return i;
     //    TODO: If the passed message length is 0 or more than 128, returns -1 and errno is set to EMSGSIZE.
