@@ -134,7 +134,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         return -EINVAL;
     }
     if (length == 0 || length > 128){
-        printk("message length is invalid, it is %d", length);
+        printk("message length is invalid, it is %ld", length);
         return -EMSGSIZE;
     }
     printk("Invoking device_write(%p,%d)\n", file, (int)length);
@@ -147,8 +147,8 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
     }
     else{ // the channel exist so we delete the node and insert a new one
         deleted_node =delete(current_channel, slots[current_slot_index].channels);
-        freek(deleted_node ->data);
-        freek(deleted_node);
+        kfree(deleted_node ->data);
+        kfree(deleted_node);
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, slots[current_slot_index].channels);
     }
     printList(slots[current_slot_index].channels);
