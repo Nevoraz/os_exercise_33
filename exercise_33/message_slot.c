@@ -54,9 +54,9 @@ static struct slot slots[256];
 static int device_open( struct inode* inode, struct file*  file ){
     int i;
     unsigned long flags; // for spinlock
+    char first_node_message[] = "first node";
     head = NULL;
     curr = NULL;
-    char first_node_message[] = "first node";
     current_minor = iminor(file_inode(file));    // TODO: to validate the current_minor
     printk("Invoking device_open(%p) the minor is: %d\n", file, current_minor);
     // We don't want to talk to two processes at the same time
@@ -231,10 +231,10 @@ static void printList(struct node *head) {
 }
 
 // insert link at the first location
-static struct node * insertFirst(long key, char * data, struct node *head) { // create a link
+static struct node * insertFirst(long key, char * data_input, struct node *head) { // create a link
     struct node * link = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
     link -> key = key;
-    strcpy(link -> data, the_message)
+    link -> data = data_input;
     // point it to old first node
     link -> next = head;
     // point first to new first node
