@@ -10,7 +10,7 @@
 
 int main(int argc, char **argv){
     int file_desc;
-    char messsage[128];
+    char messsage[128] = "";
     int i;
     printf("argc = %d\n",argc);
     for(i=0;i<argc;i++)
