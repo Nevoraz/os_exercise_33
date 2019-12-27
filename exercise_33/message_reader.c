@@ -16,7 +16,7 @@ int main(int argc, char **argv){
         exit(-1);
     }
     ioctl( file_desc, IOCTL_MSG_SLOT_CHANNEL, argv[2]);
-    read(file_desc, messsage, 5);
+    (void)read(file_desc, messsage, 5);
     printf("read succesfully the message: %s\n", messsage);
 //    TODO: use write() system call
     close(file_desc);
