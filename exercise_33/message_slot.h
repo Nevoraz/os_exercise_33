@@ -10,8 +10,8 @@
 // Set the message of the device driver
 #define IOCTL_MSG_SLOT_CHANNEL _IOW(MAJOR_NUM, 0, unsigned int)//TODO: change the 0 to MINOR_NUM
 
-#define DEVICE_RANGE_NAME "char_dev" // TODO: check this line
+#define DEVICE_RANGE_NAME "char_dev"
 #define BUF_LEN 128
-#define DEVICE_FILE_NAME "slot" // TODO: check this line
-#define SUCCESS 0 // TODO: check this line
+#define DEVICE_FILE_NAME "slot"
+#define SUCCESS 0
 #endif /* message_slot_h */

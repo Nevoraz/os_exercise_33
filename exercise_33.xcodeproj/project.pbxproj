@@ -33,7 +33,6 @@
 		DECC8CD423AE091400A47FF2 /* message_slot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = message_slot.h; sourceTree = "<group>"; };
 		DECC8CD523AE091400A47FF2 /* message_sender.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = message_sender.c; sourceTree = "<group>"; };
 		DECC8CD623AE091400A47FF2 /* readMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readMe.txt; sourceTree = "<group>"; };
-		DECC8CD723AE091400A47FF2 /* rec */ = {isa = PBXFileReference; lastKnownFileType = folder; path = rec; sourceTree = "<group>"; };
 		DECC8CD823AE091400A47FF2 /* message_reader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = message_reader.c; sourceTree = "<group>"; };
 		DECC8CD923AE091400A47FF2 /* message_slot.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = message_slot.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -75,7 +74,6 @@
 				DECC8CD523AE091400A47FF2 /* message_sender.c */,
 				DECC8CD323AE091300A47FF2 /* Makefile */,
 				DECC8CD623AE091400A47FF2 /* readMe.txt */,
-				DECC8CD723AE091400A47FF2 /* rec */,
 			);
 			path = exercise_33;
 			sourceTree = "<group>";

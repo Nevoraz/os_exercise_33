@@ -103,22 +103,25 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
     int i;
     head = NULL;
     curr = NULL;
+    if (current_channel == -1) {
+        return -EINVAL;
+    }
     result_node = find(current_channel, slots[current_slot_index].channels);
     printk("inside read() slot number = %d , slot index = %d , channel = %ld" ,current_minor, current_slot_index, current_channel);
+    if((result_node -> data_size) < length){// the provided buffer length is too small to hold the message
+        return -ENOSPC;
+    }
     if (result_node == NULL){// no message exists on the channel
         return -EWOULDBLOCK;
     }
     else{
-        // TODO: read the message atomically
         for( i = 0; i < (result_node -> data_size) && i < BUF_LEN; ++i ){
             put_user(result_node -> data[i], &buffer[i]);
         }
     }
     printk( "Invocing device_read(%p) - " "the message: %s)\n", file, buffer );
     return i;
-//    TODO: If no channel has been set on the file descriptor, returns -1 and errno is set to EINVAL.
-//    TODO:   If the provided buffer length is too small to hold the message, returns -1 and errno is set to ENOSPC
-}
+    }
 //---------------------------------------------------------------
 // a processs which has already opened
 // the device file attempts to write to it
@@ -137,7 +140,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         return -EMSGSIZE;
     }
     printk("Invoking device_write(%p,%d)\n", file, (int)length);
-    for( i = 0; i < length && i < BUF_LEN; ++i ){            // TODO: write the message atomically
+    for( i = 0; i < length && i < BUF_LEN; ++i ){
         get_user(the_message[i], &buffer[i]);
     }
     current_node = find(current_channel, slots[current_slot_index].channels);
@@ -151,12 +154,9 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
         slots[current_slot_index].channels = insertFirst(current_channel, the_message, i, slots[current_slot_index].channels);
     }
     printList(slots[current_slot_index].channels);
-//    printk("your message in channel: %ld\n", current_channel);
+    //    printk("your message in channel: %ld\n", current_channel);
     // return the number of input characters used
     return i;
-    //    TODO: If no channel has been set on the file descriptor, returns -1 and errno is set to EINVAL.
-
-    //    TODO: In any other error case (for example, failing to allocate memory), returns -1 and errno is set appropriately (you are free to choose the exact value)
 }
 //----------------------------------------------------------------
 static long device_ioctl( struct   file* file,
@@ -253,11 +253,6 @@ static struct node * insertFirst(long key, char * data_input, int data_size , st
     head = link;
     return head;
 }
-
-// is list empty
-//static int isEmpty(void) {
-//    return head == NULL;
-//}
 
 // find a link with given key
 static struct node * find(long key, struct node *head) { // start from the first link

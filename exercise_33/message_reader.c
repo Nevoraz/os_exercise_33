@@ -18,7 +18,7 @@ int main(int argc, char **argv){
         exit(1);
     }
     ioctl( file_desc, IOCTL_MSG_SLOT_CHANNEL, atol(argv[2]));
-    message_length = read(file_desc, message, 1);
+    message_length = read(file_desc, message, 128);
     if ( message_length < 0){
         printf("Error: %s\n", strerror(errno));
         exit(1);
