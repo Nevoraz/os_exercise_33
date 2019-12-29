@@ -108,6 +108,7 @@ static ssize_t device_read( struct file* file, char __user* buffer, size_t lengt
     }
     result_node = find(current_channel, slots[current_slot_index].channels);
     printk("inside read() slot number = %d , slot index = %d , channel = %ld" ,current_minor, current_slot_index, current_channel);
+    printk("hereeeeeee = %d\n", result_node->data_size);
     if((result_node -> data_size) < length){// the provided buffer length is too small to hold the message
         return -ENOSPC;
     }
@@ -161,8 +162,7 @@ static ssize_t device_write( struct file* file, const char __user* buffer, size_
 //----------------------------------------------------------------
 static long device_ioctl( struct   file* file,
                          unsigned int   ioctl_command_id,
-                         unsigned long  channel_to_set )
-{
+                         unsigned long  channel_to_set ){
     head = NULL;
     curr = NULL;
     if( IOCTL_MSG_SLOT_CHANNEL == ioctl_command_id ){// Get the parameter given to ioctl by the process
