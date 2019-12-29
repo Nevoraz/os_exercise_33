@@ -11,8 +11,7 @@
 int main(int argc, char **argv){
     int file_desc;
     char message[128] = "";
-    int i, message_length;
-//    printf("inside reader\n");
+    int message_length;
     file_desc = open( argv[1], O_RDWR );
     if( file_desc < 0 ){
         printf("Error: %s\n", strerror(errno));
@@ -24,8 +23,10 @@ int main(int argc, char **argv){
         printf("Error: %s\n", strerror(errno));
         exit(1);
     }
-//    printf("read succesfully the message: %s\n", message);
-    write(STDOUT_FILENO, message, message_length);//    TODO: use write() system call
+    if ( write(STDOUT_FILENO, message, message_length) < 0){
+        printf("Error: %s\n", strerror(errno));
+        exit(1);
+    }
     close(file_desc);
     return 0;
 }
